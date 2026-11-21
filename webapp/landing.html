@@ -53,6 +53,8 @@ h1{font-size:var(--fs-hero);line-height:1.02;letter-spacing:-.03em;font-weight:6
 .feats p{color:var(--hint);font-size:var(--fs-m);margin-top:var(--sp-1)}
 
 .phone{position:sticky;top:var(--sp-10);width:390px;height:min(800px, calc(100dvh - 2 * var(--sp-10)));min-height:600px;border-radius:var(--r-phone);border:1px solid var(--border);background:var(--bg);overflow:hidden;box-shadow:var(--sh-3)}
+.demo-link{color:inherit}
+.demo-narrow{display:none}
 .phone iframe{display:block;width:100%;height:100%;border:0}
 
 .more{padding-top:0;min-height:0}
@@ -76,6 +78,8 @@ h1{font-size:var(--fs-hero);line-height:1.02;letter-spacing:-.03em;font-weight:6
 footer{grid-column:1 / -1;display:flex;justify-content:space-between;gap:var(--sp-4);color:var(--hint);font-size:var(--fs-s);border-top:1px solid var(--border);padding-top:var(--sp-6)}
 
 @media (max-width:900px){
+  .demo-wide{display:none}
+  .demo-narrow{display:inline}
   .wrap{grid-template-columns:1fr;gap:var(--sp-8);padding:var(--sp-8) var(--sp-4);min-height:0}
   .logo{margin-bottom:var(--sp-6)}
   .phone{position:static;width:100%;max-width:390px;height:600px;min-height:0;margin:0 auto}
@@ -97,10 +101,11 @@ footer{grid-column:1 / -1;display:flex;justify-content:space-between;gap:var(--s
     <div>
       <div class="logo"><img src="static/logo.png" alt="">todogram<span class="alpha">альфа</span></div>
       <h1>Задачи из&nbsp;чата — в&nbsp;чеклист</h1>
-      <p class="lead">Отметьте сообщения в Telegram — бот соберёт из них задачу с пунктами. Без отдельного трекера.</p>
+      <p class="lead">Отметьте сообщения в Telegram — бот соберёт из них задачу с пунктами. Todogram — проект с открытым кодом.</p>
+      <p class="note">Попробуйте <a class="demo-link" href="#demo">демо <span class="demo-wide">справа</span><span class="demo-narrow">ниже</span></a> — откройте задачу и отметьте пункт.</p>
       <div class="cta">
         <a class="go" href="__BOT_LINK__?start=waitlist" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4.5L3 11.5L9.5 13.5M21 4.5L18 19.5L9.5 13.5M21 4.5L9.5 13.5M9.5 13.5V18.5L12.5 15.5"/></svg>Записаться в лист ожидания</a>
-        <a class="go ghost" href="/?demo&amp;projects">Попробовать демо</a>
+        <a class="go ghost" href="https://github.com/IvanMayorov/todogram-community">Код на GitHub</a>
       </div>
       <p class="note">Готовим платную версию Todogram. Оставьте заявку в Telegram — мы вручную приглашаем участников в закрытую альфу.</p>
     </div>
@@ -119,7 +124,7 @@ footer{grid-column:1 / -1;display:flex;justify-content:space-between;gap:var(--s
     </ul>
   </div>
 
-  <div class="phone"><iframe src="/?demo&amp;projects" title="Демо Todogram" loading="eager"></iframe></div>
+  <div class="phone" id="demo"><iframe src="/?demo&amp;projects" title="Демо Todogram" loading="eager"></iframe></div>
 
 </main>
 <div class="wrap more">
