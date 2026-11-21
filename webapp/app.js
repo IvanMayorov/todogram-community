@@ -2757,7 +2757,10 @@ function applyAvatarEdge(img){
     avatarEdges.set(src, color);
   }
   const color = avatarEdges.get(src);
-  if(color) img.closest(".project-thumb").style.backgroundColor = color;
+  if(color){
+    img.closest(".project-thumb").style.backgroundColor = color;
+    img.parentElement.style.backgroundColor = color;
+  }
 }
 $("#pplList").addEventListener("load", e=>{
   if(e.target.matches?.(".project-thumb img")) applyAvatarEdge(e.target);
