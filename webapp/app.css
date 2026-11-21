@@ -149,12 +149,15 @@ input,textarea{font:inherit;color:inherit;caret-color:var(--link)}
 /* a wide window (the site, or Telegram Desktop stretched out): two panes — the list on the left (with its menu), the open task on the right */
 @media (min-width:960px){
   :root.wide{--list-w:420px}
+  /* Only the left pane shares its height with the bottom menu. */
+  :root.wide .screens{bottom:0}
+  :root.wide:not(.kb) .screen:not(#s-task){bottom:calc(var(--tab-h) + env(safe-area-inset-bottom))}
   :root.site .phone{width:min(1200px,100%);border-left:1px solid var(--border);border-right:1px solid var(--border)}
   /* list screens slide inside the left pane only: the clip moves with the screen, so nothing shows past the pane's edge */
   :root.wide .screen{right:auto;width:var(--list-w);clip-path:inset(0);transition:transform .38s cubic-bezier(.32,.72,0,1),clip-path .38s cubic-bezier(.32,.72,0,1),opacity .3s}
   :root.wide .screen.off-right{clip-path:inset(0 100% 0 0)}
   :root.wide .screen.off-left{clip-path:inset(0 0 0 28%)}
-  :root.wide #s-task{left:var(--list-w);right:0;width:auto;bottom:calc((var(--tab-h) + env(safe-area-inset-bottom)) * -1);border-left:1px solid var(--border);padding:var(--sp-6) var(--sp-6) 120px}
+  :root.wide #s-task{left:var(--list-w);right:0;width:auto;border-left:1px solid var(--border);padding:var(--sp-6) var(--sp-6) calc(var(--sp-6) + var(--kb,0px))}
   :root.wide #s-task{clip-path:none;transition:transform .3s cubic-bezier(.32,.72,0,1),opacity .22s}
   :root.wide #s-task.off-right{transform:translateX(24px);opacity:0;pointer-events:none}   /* the task pane: a short fade, not a slide across */
   :root.wide .screen.under{transform:none;opacity:1;pointer-events:auto;clip-path:inset(0)}   /* the list the open task came from stays */
@@ -165,8 +168,7 @@ input,textarea{font:inherit;color:inherit;caret-color:var(--link)}
   :root.wide .sheet .card{width:min(460px,calc(100% - 40px));margin:20px}
   :root.wide .toast{left:50%;right:auto;width:420px;margin-left:-210px}
   :root.site .tg-head .ttl{left:calc(var(--list-w) / 2)}
-  /* Telegram Desktop stretched wide: the same two panes, no header of ours, the tab bar over the screens */
-  :root.tg #s-task{bottom:0}
+  /* Telegram Desktop has no app header. */
   :root.tg .wide-empty{top:0}
 }
 .wide-empty{display:none;position:absolute;top:52px;bottom:0;left:var(--list-w,420px);right:0;align-items:center;justify-content:center;color:var(--hint);font-size:var(--fs-base);border-left:1px solid var(--border);pointer-events:none}
