@@ -1,0 +1,18 @@
+[package]
+name = "todogram"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+tauri = { version = "2.9", features = [] }
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[profile.release]
+strip = true
+opt-level = "s"
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

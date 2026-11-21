@@ -2,6 +2,12 @@
 
 Telegram-бот, который делает чеклисты из сообщений рабочего чата, и мини-приложение для их правки.
 
+[Сайт Todogram](https://todogram.pro/) · [Интерактивное демо](https://todogram.pro/?demo&projects) · [Скачать для Mac](https://github.com/IvanMayorov/todogram-community/releases/download/mac-v0.1.0/Todogram-0.1.0-arm64.dmg)
+
+В демо можно открыть проект, выбрать задачу и отметить пункты чеклиста на примерах без входа в Telegram.
+
+Для Mac с Apple Silicon доступна тестовая версия 0.1.0. [Установка и сборка клиента](desktop/README.md).
+
 ## Из чего состоит
 
 | Путь | Что это |

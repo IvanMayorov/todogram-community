@@ -1,0 +1,13 @@
+{
+  "productName": "Todogram",
+  "version": "0.1.0",
+  "identifier": "pro.isite.tasks.desktop",
+  "app": { "windows": [] },
+  "bundle": {
+    "active": true,
+    "targets": ["app", "dmg"],
+    "icon": ["icons/Todogram.icns"],
+    "category": "Productivity",
+    "macOS": { "minimumSystemVersion": "12.0" }
+  }
+}
