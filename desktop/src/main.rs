@@ -1,5 +1,6 @@
 use std::process::Command;
-use tauri::{webview::NewWindowResponse, Url, WebviewUrl, WebviewWindowBuilder};
+use tauri::menu::{Menu, MenuItem};
+use tauri::{Manager, webview::NewWindowResponse, Url, WebviewUrl, WebviewWindowBuilder};
 
 fn open_external(url: &Url) {
     if matches!(url.scheme(), "https" | "http" | "tg" | "mailto") {
@@ -11,6 +12,26 @@ fn open_external(url: &Url) {
 
 fn main() {
     tauri::Builder::default()
+        .menu(|app| {
+            let menu = Menu::default(app)?;
+            let refresh = MenuItem::with_id(app, "refresh-screen", "Обновить экран", true, Some("Cmd+R"))?;
+            for item in menu.items()? {
+                if let Some(view) = item.as_submenu() {
+                    if view.text()? == "View" {
+                        view.insert(&refresh, 0)?;
+                        break;
+                    }
+                }
+            }
+            Ok(menu)
+        })
+        .on_menu_event(|app, event| {
+            if event.id().as_ref() == "refresh-screen" {
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.eval("window.dispatchEvent(new Event('todogram-refresh'))");
+                }
+            }
+        })
         .setup(|app| {
             let site = Url::parse("https://tasks.isite.pro/")?;
             let origin = site.origin();

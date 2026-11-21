@@ -443,20 +443,27 @@ async function refreshScreen(checkVersion=true){
   if(top === "s-task" && curTask && LIVE){ const id = curTask.id, f = fromApi(await api(`/api/tasks/${id}`)); if(stack.at(-1) === top && curTask?.id === id){ applyFresh(f, true); renderTask(); } }
 }
 let refreshingByKey = false;
-window.addEventListener("keydown", async e=>{
+window.addEventListener("keydown", e=>{
   if(!e.metaKey || e.altKey || e.ctrlKey || e.shiftKey || e.code !== "KeyR" && e.key.toLowerCase() !== "r") return;
   e.preventDefault();
-  if(e.repeat || refreshingByKey || ghosting || layerOpen() || curTask?.items?.some(i=>i._t)) return;
+  if(!e.repeat) refreshByCommand();
+}, true);
+window.addEventListener("todogram-refresh", refreshByCommand);
+async function refreshByCommand(){
+  if(refreshingByKey || ghosting) return;
+  if(layerOpen() || curTask?.items?.some(i=>i._t)){ toast("Завершите действие перед обновлением"); return; }
   const top = stack.at(-1), screen = document.getElementById(top);
-  if(top === "s-task" && document.activeElement === $("#titleInp")) return;
+  if(top === "s-task" && document.activeElement === $("#titleInp") && $("#titleInp").value !== curTask?.title){ toast("Сохраните название перед обновлением"); return; }
   const scroll = screen.scrollTop;
   refreshingByKey = true;
+  toast("Обновляем экран…");
   try{
+    if(tg?.web && !siteSession){ await showLogin(); return; }
     await refreshScreen(false);
     if(stack.at(-1) === top && screen.scrollTop === 0 && scroll) screen.scrollTop = scroll;
   }catch(e){ fail(e); }
   finally{ refreshingByKey = false; }
-}, true);
+}
 (()=>{
   const PULL_AT = 84, MAX = 150, HOLD = 56, ind = $("#ptr"), SZ = 34;   // px of the screen's way down
   let st = null, busy = false;
@@ -2551,6 +2558,43 @@ async function loadPeople(quiet=false){
   else if(ppl.who === null || ppl.who === d.me || (ppl.who > 0 && !d.people.some(p=>p.id === ppl.who))) ppl.who = -1;
   if(key !== ppl.key){ ppl.key = key; renderPeople(); }
 }
+// Sample just inside the displayed circular crop, after object-fit:cover.
+const avatarEdges = new Map();
+function applyAvatarEdge(img){
+  const src = img.currentSrc || img.src;
+  if(!avatarEdges.has(src)){
+    const size = 32, canvas = document.createElement("canvas");
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext("2d"), crop = Math.min(img.naturalWidth, img.naturalHeight);
+    if(!ctx || !crop) return;
+    let color = null;
+    try{
+      ctx.drawImage(img, (img.naturalWidth-crop)/2, (img.naturalHeight-crop)/2, crop, crop, 0, 0, size, size);
+      const pixels = ctx.getImageData(0, 0, size, size).data, groups = new Map();
+      let winner;
+      for(let i=0; i<64; i++){
+        const angle = i * Math.PI / 32;
+        const x = Math.round(15.5 + 14.5*Math.cos(angle)), y = Math.round(15.5 + 14.5*Math.sin(angle));
+        const [r,g,b,a] = pixels.subarray(4*(y*size+x), 4*(y*size+x)+4);
+        if(a < 220) continue;
+        const bucket = (r >> 4)*256 + (g >> 4)*16 + (b >> 4);
+        const group = groups.get(bucket) || {count:0, r:0, g:0, b:0};
+        group.count++; group.r+=r; group.g+=g; group.b+=b; groups.set(bucket, group);
+        if(!winner || group.count > winner.count) winner = group;
+      }
+      if(winner && winner.count >= 12){
+        color = "rgb(" + [winner.r,winner.g,winner.b].map(n=>Math.round(n/winner.count)).join(",") + ")";
+      }
+    }catch(_){ /* a cross-origin photo can be shown even when its pixels cannot be read */ }
+    if(avatarEdges.size >= 256) avatarEdges.delete(avatarEdges.keys().next().value);
+    avatarEdges.set(src, color);
+  }
+  const color = avatarEdges.get(src);
+  if(color) img.closest(".project-thumb").style.backgroundColor = color;
+}
+$("#pplList").addEventListener("load", e=>{
+  if(e.target.matches?.(".project-thumb img")) applyAvatarEdge(e.target);
+}, true);
 function renderPeople(stackIn=false){
   const d = ppl.data; if(!d) return;
   unghost($("#pplList")); unghost($("#pplBar")); unghost($("#pplFilter"));
