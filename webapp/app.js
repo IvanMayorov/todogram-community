@@ -8,6 +8,7 @@ const inTg = !!(tgRaw && tgRaw.initData);
 /* On the site (a plain browser) the person signs in through the bot; the session works like Telegram's initData.
    Demo data only on localhost or with ?demo. Outside Telegram «tg» is a stand-in with browser fallbacks. */
 const DEMO = !inTg && (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || new URLSearchParams(location.search).has("demo"));
+if(DEMO && window.parent !== window) document.documentElement.classList.add("embedded-demo");
 let siteSession = null; try{ siteSession = localStorage.getItem("siteSession"); }catch(_){}
 function siteTg(){
   const dark = matchMedia("(prefers-color-scheme: dark)");
@@ -694,7 +695,7 @@ function boneUp(root, scopes = [root]){
   };
   // visibility is not checked: the ghost itself hides what gets a block (see #s-task.ghost)
   const shown = el => { for(let e = el; e && e !== root; e = e.parentElement){ const cs = getComputedStyle(e); if(cs.display === "none" || +cs.opacity === 0) return false; } return true; };
-  const SKIP = ".iacts,.idone,.acts,#taskCode,.chev";   // swipe actions waiting off to the side, ids, arrows
+  const SKIP = ".iacts,.idone,.acts,.tdone,#taskCode,.chev";   // swipe actions waiting off to the side, ids, arrows
   const isBlock = el => {
     if(/^(IMG|SVG|VIDEO|CANVAS|svg)$/.test(el.tagName) || el.id === "ring") return true;
     const cs = getComputedStyle(el), r = el.getBoundingClientRect();
@@ -2572,8 +2573,9 @@ function renderPeople(stackIn=false){
   for(const pid of order) byP.get(pid).sort((a,b)=>rk(b) - rk(a) || b.id - a.id);
   const row = t=>{
       const d = done(t), n = total(t), pct = n ? d/n*100 : 0, st = stOf(t), th = t.thumb;
+      const project = ppl.mine && !th && t.project !== PERSONAL_NAME && projects.find(p=>p.id === t.pid && !isPersonal(p));
       return `<div class="swipe" data-w="${t.id}">${rowActs(t)}<button class="task" data-t="${t.id}" data-pid="${t.pid}">${rowDone(t)}
-        <div class="thumb" style="${th?"":"background:var(--muted);display:grid;place-items:center;color:var(--hint)"}">${th ? shotHTML(th) : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path fill-rule="evenodd" clip-rule="evenodd" d="M16.002 20.999H7.998C5.236 20.999 2.996 18.748 2.996 16.005V7.981C2.996 5.238 5.236 2.987 7.998 2.987H16.002C18.764 2.987 21.004 5.238 21.004 7.981V16.005C21.004 18.748 18.764 20.999 16.002 20.999Z"/><path d="M14.268 11.011L11.434 13.835L9.733 12.116"/></svg>`}</div>
+        <div class="thumb" style="${th?"":"background:var(--muted);display:grid;place-items:center;color:var(--hint)"}">${th ? shotHTML(th) : project ? avSmall(project, project.color) : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path fill-rule="evenodd" clip-rule="evenodd" d="M16.002 20.999H7.998C5.236 20.999 2.996 18.748 2.996 16.005V7.981C2.996 5.238 5.236 2.987 7.998 2.987H16.002C18.764 2.987 21.004 5.238 21.004 7.981V16.005C21.004 18.748 18.764 20.999 16.002 20.999Z"/><path d="M14.268 11.011L11.434 13.835L9.733 12.116"/></svg>`}</div>
         <div class="main"><div class="t">${esc(t.title)}</div>
           <div class="meta">${statusBadge(t)}${t.due ? dueBadge(t) : ""}${ppl.who === -1 && t.assignee ? whoBadge(t.assignee) : ""}${qBadge(t)}${itemsBadge(d, n)}${ppl.mine && ppl.pid === null && t.project ? `<span class="t-proj">${esc(t.project)}</span>` : ""}</div>
         </div></button></div>`;
@@ -3198,7 +3200,7 @@ async function saveDue(t, due, rem){
 }
 /* ---------- Assignee ---------- */
 const firstName = n => String(n||"").trim().split(/\s+/)[0] || "";
-const avSmall = p => `<span class="pav-s" style="background:${avColor(p.name||"?")}">${esc((p.name||"?").trim()[0]||"?")}${p.photo?`<img src="${esc(p.photo)}" alt="" loading="lazy" onerror="this.remove()">`:""}</span>`;
+const avSmall = (p, color = avColor(p.name||"?")) => `<span class="pav-s" style="background:${color}">${esc((p.name||"?").replace(/[«»"]/g,"").trim()[0]||"?")}${p.photo?`<img src="${esc(p.photo)}" alt="" loading="lazy" onerror="this.remove()">`:""}</span>`;
 const peopleCache = {};
 async function openAssign(t, onPick = p=>setAssignee(t, p)){
   const sh = $("#assignSheet"), box = $("#assignList");
