@@ -34,6 +34,19 @@ CREATE TABLE IF NOT EXISTS projects (
     added_at    INTEGER
 );
 
+CREATE TABLE IF NOT EXISTS project_info_images (
+    id         TEXT PRIMARY KEY,
+    chat_id    INTEGER NOT NULL,
+    mime       TEXT NOT NULL,
+    data       BLOB NOT NULL,
+    removed_at INTEGER
+);
+CREATE INDEX IF NOT EXISTS ix_project_info_images_chat ON project_info_images(chat_id, removed_at);
+CREATE TRIGGER IF NOT EXISTS project_info_images_cleanup AFTER DELETE ON projects
+BEGIN
+    DELETE FROM project_info_images WHERE chat_id=OLD.chat_id;
+END;
+
 CREATE TABLE IF NOT EXISTS chat_upgrades (
     old_id INTEGER PRIMARY KEY,
     new_id INTEGER NOT NULL UNIQUE
@@ -290,7 +303,9 @@ class DB:
             "projects": {"auto": "INTEGER DEFAULT 0", "auto_cursor": "INTEGER DEFAULT 0",
                          "invite": "TEXT",    # token of the invite link (startapp=join_<token>); NULL = not made yet
                          "owner_id": "INTEGER",    # who made a project without a chat (see standalone); NULL = a chat
-                         "pic": "TEXT"},           # the project's own picture, a file in media/ (over the chat's photo); NULL = none
+                         "pic": "TEXT",           # the project's own picture, a file in media/ (over the chat's photo); NULL = none
+                         "info": "TEXT NOT NULL DEFAULT ''",
+                         "info_revision": "INTEGER NOT NULL DEFAULT 0"},
             "chat_upgrades": {"old_invite": "TEXT"},
             "messages": {"transcript": "TEXT", "duration": "INTEGER"},
             "waitlist": {"approved": "INTEGER"},
@@ -555,6 +570,9 @@ class DB:
                 await conn.execute(
                     "UPDATE projects AS dst SET "
                     "name=COALESCE(dst.name,src.name), pic=COALESCE(dst.pic,src.pic), "
+                    "info=CASE WHEN dst.info='' THEN src.info WHEN src.info='' OR dst.info=src.info THEN dst.info "
+                    "ELSE dst.info || char(10,10) || src.info END, "
+                    "info_revision=MAX(dst.info_revision,src.info_revision)+1, "
                     "invite=COALESCE(dst.invite,src.invite), added_at=MIN(dst.added_at,src.added_at), "
                     "auto=MAX(COALESCE(dst.auto,0),COALESCE(src.auto,0)) "
                     "FROM projects AS src WHERE dst.chat_id=? AND src.chat_id=?", (new_id, old_id))
@@ -562,6 +580,7 @@ class DB:
                     "INSERT OR IGNORE INTO project_access(chat_id,user_id,name,added_at) "
                     "SELECT ?,user_id,name,added_at FROM project_access WHERE chat_id=?", (new_id, old_id))
                 await conn.execute("DELETE FROM project_access WHERE chat_id=?", (old_id,))
+                await conn.execute("UPDATE project_info_images SET chat_id=? WHERE chat_id=?", (new_id, old_id))
                 await conn.execute("DELETE FROM projects WHERE chat_id=?", (old_id,))
             cur = await conn.execute(
                 "UPDATE tasks SET chat_id=?, legacy_chat_id=? WHERE chat_id=?",
@@ -732,6 +751,7 @@ class DB:
         cutoff = int(time.time()) - settings.buffer_days * 86400
         # messages a task was made from stay: the app shows them as the task's original wording
         await self.x("DELETE FROM messages WHERE date < ? AND task_id IS NULL", (cutoff,))
+        await self.x("DELETE FROM project_info_images WHERE removed_at < ?", (int(time.time()) - 3600,))
 
     # ---------- drafts ----------
     async def draft_add(self, chat_id: int, user_id: int, message_id: int):

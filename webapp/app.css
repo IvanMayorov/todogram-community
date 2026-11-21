@@ -443,7 +443,15 @@ button.bdg:active{transform:scale(.94)}
 .descr a.ln{color:var(--link);text-decoration:none;border-bottom:1px solid color-mix(in srgb, var(--link) 35%, transparent);word-break:break-all}
 .sheet .btns3 button[hidden],.sheet .btns button[hidden]{display:none}
 /* grows with the text, but stays a third of the screen: with the keyboard up the buttons are still seen */
-#descrInp,#commEditInp{max-height:33dvh;overflow-y:auto}
+#descrInp,#commEditInp,#projInfoInp{max-height:33dvh;overflow-y:auto}
+.proj-info-gallery{margin-top:var(--gap-in)}
+.proj-info-gallery .src-msg{height:100%;margin:0;padding:0;border:0;user-select:none;-webkit-touch-callout:none}
+.proj-info-gallery a{display:block;height:100%;-webkit-user-drag:none}
+#projInfoActions[hidden]{display:none}
+#projInfoActions:has(> [hidden]) > :not([hidden]){grid-column:1/-1}
+.proj-info-conflict{font-size:var(--fs-s)}
+.proj-info-conflict summary{color:var(--link);cursor:pointer}
+.proj-info-current{max-height:18dvh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}
 /* questions and comments right on the task screen: open questions first, tinted; then the rest in order; the field under them */
 .talk-list{display:flex;flex-direction:column;gap:var(--sp-2)}
 .talk-list:empty{display:none}

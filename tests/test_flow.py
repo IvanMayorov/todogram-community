@@ -83,6 +83,9 @@ async def check_chat_upgrade(bot):
     old, new = -710234567, -1007102345678
     await db.upsert_project(old, "Группа")
     await db.upsert_project(new, "Группа")
+    await db.x("UPDATE projects SET info=?, info_revision=1 WHERE chat_id=?", ("Материалы проекта", old))
+    await db.x("INSERT INTO project_info_images(id,chat_id,mime,data) VALUES(?,?,?,?)",
+               ("c" * 32, old, "image/png", b"old photo"))
     old_invite = await db.invite_token(old)
     new_invite = await db.invite_token(new)
     await db.grant_access(old, 13, "Саша")
@@ -112,6 +115,8 @@ async def check_chat_upgrade(bot):
             await dp.feed_update(telegram, update)
     await db.upsert_project(old, "Позднее событие старой группы")
     assert await db.project(old) is None
+    assert (await db.project(new))["info"] == "Материалы проекта"
+    assert (await db.one("SELECT chat_id FROM project_info_images WHERE id=?", ("c" * 32,)))["chat_id"] == new
     assert {row["id"] for row in await db.tasks_of_chat(new)} == {tid, existing}
     assert await db.has_access(new, 13)
     assert (await db.project_by_invite(old_invite))["chat_id"] == new
@@ -250,6 +255,38 @@ async def main():
     assert back == {"photo": pr[0]["photo"], "pic": False}, back
     from app.web import _pic_path
     assert not _pic_path(first).exists(), "the file goes with it"
+    # Project info is shared by members, with optimistic editing and signed photo URLs.
+    info_url = f"/api/projects/{CHAT}/info"
+    outsider = {"Authorization": "tma " + init_data(2)}
+    start = await (await client.get(info_url, headers=H)).json()
+    assert start == {"text": "", "revision": 0, "photos": []}
+    assert (await client.get(info_url, headers=outsider)).status == 404
+    assert (await client.put(info_url, headers=outsider, json={"text": "чужой проект", "revision": 0})).status == 404
+    update = {"text": "Макеты\nhttps://example.com/design", "revision": 0}
+    saved = await (await client.put(info_url, headers=H, json=update)).json()
+    assert saved["text"] == update["text"] and saved["revision"] == 1
+    assert (await client.put(info_url, headers=H, json=update)).status == 200  # retry after a lost response
+    assert (await client.put(info_url, headers=H, json={**update, "text": "Старая версия"})).status == 409
+
+    photo_id = "a" * 32
+    photo_path = f"{info_url}/photos/{photo_id}"
+    image_bytes = b"\x89PNG\r\n\x1a\n-test"
+    assert (await client.put(photo_path, data=image_bytes, headers=outsider)).status == 404
+    assert (await client.put(photo_path, data=b"<html>", headers=H)).status == 415
+    uploaded = await (await client.put(photo_path, data=image_bytes, headers=H)).json()
+    assert [p["id"] for p in uploaded["photos"]] == [photo_id]
+    photo_url = uploaded["photos"][0]["url"]
+    assert (await client.get(photo_path)).status == 403
+    photo = await client.get(photo_url)
+    assert photo.content_type == "image/png" and await photo.read() == image_bytes
+    assert (await (await client.put(photo_path, data=image_bytes, headers=H)).json()) == uploaded
+    assert (await client.delete(photo_path, headers=outsider)).status == 404
+    assert (await (await client.delete(photo_path, headers=H)).json())["photos"] == []
+    assert (await client.get(photo_url)).status == 404
+    restored = await (await client.patch(photo_path, headers=H)).json()
+    assert restored["photos"][0]["id"] == photo_id and restored["text"] == saved["text"]
+    await client.delete(photo_path, headers=H)
+
     # a picture by its link: the server downloads it, but never from localhost / the LAN / a non-http scheme
     for bad in ("http://127.0.0.1/x.png", "http://10.0.0.1/x.png", "http://169.254.169.254/latest", "file:///etc/passwd", "ftp://example.com/a.png", ""):
         r = await client.post(f"/api/projects/{CHAT}/photo_fetch", json={"url": bad}, headers=H)

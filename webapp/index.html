@@ -98,8 +98,21 @@
           <button class="tile" id="accessBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M2 21c0-3.3 3.1-6 7-6 1.5 0 2.9.4 4 1.1"/><path d="M19 14v6"/><path d="M16 17h6"/></svg><span>Доступ</span></button>
           <button class="tile" id="histProj"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12L15 14"/></svg><span>История</span></button>
         </div>
+        <button class="link-row" id="openProjInfo" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9V3.498C5 2.671 5.672 2 6.5 2V2C7.328 2 8 2.671 8 3.498V9.999C8 11.657 6.657 13 5 13V13C3.343 13 2 11.657 2 9.999V5.001"/><path d="M11 8.001H16"/><path d="M11 12.001H16"/><path d="M9 16.001H16"/><path d="M5 13V19.001C5 20.107 5.895 20.999 7 20.999H18C19.105 20.999 20 20.107 20 19.001V5.001C20 3.895 19.105 2.999 18 2.999H8"/></svg>Информация<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10 16L14 12L10 8"/></svg></button>
         <button class="link-row" id="projPic" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M20.5 15.5L16 11L7 19.5"/></svg>Картинка проекта<svg class="chev" style="margin-left:auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6L15.5 12L9.5 18"/></svg></button>
         <button class="link-row" id="renameProj" type="button" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="M13.5 6.5l4 4"/></svg><span id="renameProjTx">Переименовать проект</span><svg class="chev" style="margin-left:auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6L15.5 12L9.5 18"/></svg></button>
+      </section>
+
+      <section class="screen off-right" id="s-proj-info">
+        <div class="eyebrow" id="projInfoName"></div>
+        <h2 class="h-big">Информация</h2>
+        <div id="projInfoBody"></div>
+        <div class="foot-grid" id="projInfoActions" hidden>
+          <button class="tile" type="button" id="projInfoText"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17.539 10.12L13.88 6.46"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.251 21.001H3V17.75C3 17.484 3.105 17.23 3.293 17.042L16.627 3.709C17.018 3.318 17.649 3.318 18.042 3.709L20.294 5.961C20.683 6.352 20.683 6.984 20.294 7.375L6.958 20.707C6.771 20.895 6.516 21.001 6.251 21.001Z"/></svg><span>Добавить текст</span></button>
+          <button class="tile" type="button" id="projInfoPhoto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21.003 12.981V16.993C21.003 19.203 19.214 21.004 17.003 21.004H6.998C4.788 21.004 2.995 19.203 2.995 16.993V7.004C2.995 4.793 4.788 2.992 6.998 2.992H10.998"/><circle cx="18.002" cy="5.98" r="4.002"/><path d="M19.255 5.98H16.754"/><path d="M18.002 4.752V7.249"/><path d="M2.995 13.022L4.292 11.712C4.743 11.261 5.357 11.016 5.999 11.016C6.638 11.016 7.252 11.261 7.702 11.712L12.001 16.01"/><path d="M7.002 21.004L13.299 14.7C14.24 13.758 15.767 13.758 16.709 14.7L20.651 18.63"/></svg><span>Добавить фото</span></button>
+        </div>
+        <button class="link-row" type="button" id="projInfoRetry" hidden>Повторить загрузку</button>
+        <input type="file" id="projInfoFiles" accept="image/*" multiple hidden>
       </section>
 
       <!-- Tasks of people: mine and everyone else's, from all projects -->
@@ -441,6 +454,19 @@
           <div class="sheet-hint">Ссылки станут кликабельными</div>
         </div>
         <div class="btns3"><button id="descrDel" class="danger" type="button">Убрать</button><button id="descrCancel" type="button">Отмена</button><button id="descrSave" class="primary" type="button">Сохранить</button></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="projInfoSheet">
+      <div class="card">
+        <div class="h">Текст проекта</div>
+        <textarea class="fld" id="projInfoInp" rows="7" maxlength="20000" aria-label="Текст проекта" placeholder="Ссылки, заметки, контакты"></textarea>
+        <details class="proj-info-conflict" id="projInfoConflict" hidden>
+          <summary>Текст изменил другой участник</summary>
+          <div class="sheet-hint">Сверьте обе версии и сохраните нужный текст.</div>
+          <div class="proj-info-current" id="projInfoCurrent"></div>
+        </details>
+        <div class="btns3"><button id="projInfoCancel" type="button">Отмена</button><button id="projInfoSave" class="primary" type="button">Сохранить</button></div>
       </div>
     </div>
 

@@ -310,10 +310,12 @@ function closeLB(){
 }
 /* Back always closes what is open right now, and only then goes to the previous screen */
 function layerOpen(){
+  if($("#projInfoSheet").classList.contains("open")) return true;
   return $("#itemSheet").classList.contains("open") || $("#newSheet").classList.contains("open") || $("#renameSheet").classList.contains("open") || $("#projNameSheet").classList.contains("open") || $("#timeSheet").classList.contains("open") || $("#rangeSheet").classList.contains("open") || $("#picSheet").classList.contains("open") || $("#statusSheet").classList.contains("open") || $("#dueSheet").classList.contains("open") || $("#assignSheet").classList.contains("open") || $("#projSheet").classList.contains("open") || $("#srcSheet").classList.contains("open") || $("#commSheet").classList.contains("open") || $("#closeSheet").classList.contains("open") || $("#resSheet").classList.contains("open") || $("#linkSheet").classList.contains("open") || $("#descrSheet").classList.contains("open") || $("#commEditSheet").classList.contains("open")
       || $("#lb").classList.contains("open") || !!window.VibeLightbox?.isOpen() || !!openRow;
 }
 function back(){
+  if($("#projInfoSheet").classList.contains("open")){ $("#projInfoCancel").click(); return; }
   if($("#srcSheet").classList.contains("open")){ $("#srcSheet").classList.remove("open"); return; }
   if($("#commSheet").classList.contains("open")){ $("#commClose").click(); return; }
   if($("#descrSheet").classList.contains("open")){ $("#descrCancel").click(); return; }
@@ -433,6 +435,7 @@ async function refreshScreen(checkVersion=true){
   const top = stack.at(-1);
   if(top === "s-projects") return loadProjects();
   if(top === "s-tasks") return loadTasks();
+  if(top === "s-proj-info") return loadProjectInfo(projectInfo);
   if(top === "s-people") return loadPeople();
   if(top === "s-history") return refreshFeed();
   if(top === "s-notif") return loadNotif(false, true);
@@ -557,7 +560,7 @@ async function refreshByCommand(){
 })();
 // popups and the viewer open/close in many places: keep the Back button in sync automatically
 const backSync = new MutationObserver(()=>updBack());
-["linkSheet","itemSheet","renameSheet","projNameSheet","timeSheet","rangeSheet","picSheet","newSheet","statusSheet","dueSheet","assignSheet","lb"].forEach(id=>backSync.observe(document.getElementById(id), {attributes:true, attributeFilter:["class"]}));
+["linkSheet","itemSheet","renameSheet","projNameSheet","projInfoSheet","timeSheet","rangeSheet","picSheet","newSheet","statusSheet","dueSheet","assignSheet","lb"].forEach(id=>backSync.observe(document.getElementById(id), {attributes:true, attributeFilter:["class"]}));
 $("#backBtn").onclick = back;
 $("#moreBtn").onclick = ()=>tg?.web ? $("#openSettings").click() : toast("Меню Telegram: обновить, настройки");
 
@@ -1127,7 +1130,7 @@ const itemComments = (t, it) => (t.comments || []).filter(c=>c.item_id != null &
 let commItem = null;   // the item whose comments are open; null — the whole task (every comment, item ones marked)
 /* a link in a comment opens in a window of its own (Telegram: the browser), never inside the app */
 document.addEventListener("click", e=>{
-  const a = e.target.closest?.(".src-msg.comm a.ln, #s-comments a.ln, #descr a.ln"); if(!a) return;
+  const a = e.target.closest?.(".src-msg.comm a.ln, #s-comments a.ln, #descr a.ln, #projInfoBody a.ln"); if(!a) return;
   e.preventDefault(); e.stopPropagation();
   const url = a.dataset.url.replace(/&amp;/g,"&");
   if(tg) tg.openLink(url); else window.open(url, "_blank", "noopener");
@@ -2053,6 +2056,170 @@ function openPic(proj){
   $("#picUrl").value = ""; draw(); sh.classList.add("open"); haptic();
 }
 $("#projPic").onclick = ()=>openPic(curProj);
+/* ---------- Shared project notes and photos ---------- */
+const PROJECT_PHOTO_LIMIT = 12, PROJECT_PHOTO_SIZE = 4 * 1024 * 1024;
+const demoProjectInfo = new Map();
+let projectInfo = null;
+const projectInfoPath = state => `/api/projects/${state.id}/info`;
+const infoIsOpen = state => projectInfo === state && stack.at(-1) === "s-proj-info";
+const projectInfoText = (text, actions="") => `<div class="descr-box"><div class="descr"><div class="tx"${actions?' tabindex="0"':""}>${linkify(text)}</div>${actions}</div></div>`;
+function renderProjectInfo(state, ghost=false){
+  if(!infoIsOpen(state)) return;
+  const box = $("#projInfoBody"), data = state.data;
+  if(!ghost) unghost(box);
+  if(openRow && box.contains(openRow)) closeRow();
+  $("#projInfoRetry").hidden = !state.error;
+  $("#projInfoActions").hidden = !data;
+  if(ghost){
+    box.innerHTML = projectInfoText("Заметки и ссылки проекта\nПодробности работы");
+    return;
+  }
+  if(!data){
+    box.innerHTML = `<div class="empty">Не удалось загрузить информацию</div>`;
+    return;
+  }
+  $("#projInfoText").hidden = !!data.text;
+  const photoBtn = $("#projInfoPhoto"), full = data.photos.length >= PROJECT_PHOTO_LIMIT;
+  photoBtn.disabled = !!state.uploading || full;
+  photoBtn.querySelector("span").textContent = state.uploading ? "Загрузка…" : full ? "12 из 12 фото" : "Добавить фото";
+  const edit = `<div class="iacts"><button class="act-ren" type="button" aria-label="Изменить текст">${IC_EDIT}</button><button class="act-del" type="button" aria-label="Удалить текст">${IC_DEL}</button></div>`;
+  const photos = data.photos.map(f=>`<div class="shut"><div class="src-msg"><a data-lightbox="project-${state.id}" href="${esc(f.url)}" aria-label="Открыть фото"><img src="${esc(f.url)}" alt="" loading="lazy" draggable="false"></a><div class="iacts"><button class="act-del" type="button" data-img="${esc(f.id)}" aria-label="Удалить фото">${IC_DEL}</button></div></div></div>`).join("");
+  box.innerHTML = (data.text ? projectInfoText(data.text, edit) : "")
+    + (photos ? `<div class="c-media proj-info-gallery">${photos}</div>` : "")
+    + (!data.text && !photos ? `<div class="empty">Добавьте ссылки, заметки или фотографии проекта</div>` : "");
+  const note = box.querySelector(".descr");
+  if(note){
+    const editText = ()=>{ closeRow(); editProjectInfo(state); };
+    initShutter(note, DESCR_W, editText);
+    note.querySelector(".act-ren").onclick = editText;
+    note.querySelector(".act-del").onclick = ()=>{ closeRow(); saveProjectInfo(state, "", data).catch(fail); };
+    note.querySelector(".tx").onkeydown = e=>{ if(e.target === e.currentTarget && e.key === "Enter") editText(); };
+  }
+  box.querySelectorAll(".src-msg").forEach(row=>{
+    initShutter(row, SHUT_W / 2);
+    const btn = row.querySelector("[data-img]");
+    btn.onclick = ()=>{ closeRow(); changeProjectPhoto(state, btn.dataset.img, false).catch(fail); };
+  });
+  box.querySelectorAll(".iacts button").forEach(btn=>btn.onfocus = ()=>{
+    if(!btn.matches(":focus-visible")) return;
+    const row = btn.closest(".descr, .src-msg");
+    if(openRow === row) return;
+    closeRow(); setRow(row, row.matches(".descr") ? -DESCR_W : -SHUT_W / 2);
+    openRow = row; updBack();
+  });
+}
+async function loadProjectInfo(state){
+  try{
+    const data = LIVE ? await api(projectInfoPath(state)) : demoProjectInfo.get(state.id) || {text:"", revision:0, photos:[]};
+    if(!infoIsOpen(state)) return;
+    state.data = data; state.error = false;
+  }catch(e){
+    if(!infoIsOpen(state)) return;
+    if(state.data){ fail(e); return; }
+    state.error = true;
+  }
+  renderProjectInfo(state);
+}
+function setProjectInfo(state, data){
+  state.data = data;
+  if(!LIVE) demoProjectInfo.set(state.id, data);
+  renderProjectInfo(state);
+  return data;
+}
+async function saveProjectInfo(state, value, before){
+  const text = value.trim();
+  if(text === before.text) return before;
+  const data = LIVE ? await api(projectInfoPath(state), "PUT", {text, revision:before.revision})
+    : {...state.data, text, revision:before.revision + 1};
+  setProjectInfo(state, data);
+  haptic("medium");
+  toast(text ? "Текст сохранён" : "Текст удалён", null, text ? undefined : {undo:async ()=>{
+    try{ await saveProjectInfo(state, before.text, data); }catch(e){ fail(e); }
+  }});
+  return data;
+}
+function editProjectInfo(state){
+  const sheet = $("#projInfoSheet"), inp = $("#projInfoInp"), saveBtn = $("#projInfoSave"), conflict = $("#projInfoConflict");
+  let before = state.data;
+  inp.value = before.text;
+  conflict.open = false; conflict.hidden = true;
+  const close = ()=>{
+    if(saveBtn.disabled) return;
+    inp.blur(); sheet.classList.remove("open");
+  };
+  $("#projInfoCancel").onclick = close;
+  sheet.onclick = e=>{ if(e.target === sheet) close(); };
+  saveBtn.onclick = async ()=>{
+    saveBtn.disabled = true;
+    try{
+      await saveProjectInfo(state, inp.value, before);
+      saveBtn.disabled = false; close();
+    }catch(e){
+      try{
+        if(!e.message.startsWith("409 ")) throw e;
+        before = setProjectInfo(state, await api(projectInfoPath(state)));
+        $("#projInfoCurrent").textContent = before.text || "Текст удалён";
+        conflict.hidden = false; conflict.open = true;
+      }catch(err){ fail(err); }
+    }finally{ saveBtn.disabled = false; }
+  };
+  sheet.classList.add("open"); haptic(); focusField(inp);
+}
+async function changeProjectPhoto(state, id, restore){
+  const current = state.data.photos.find(f=>f.id === id);
+  const data = LIVE ? await api(`${projectInfoPath(state)}/photos/${id}`, restore ? "PATCH" : "DELETE")
+    : {...state.data, photos:restore ? [...state.data.photos, restore] : state.data.photos.filter(f=>f.id !== id)};
+  setProjectInfo(state, data);
+  haptic();
+  if(!restore) toast("Фото удалено", null, {undo:()=>changeProjectPhoto(state, id, current).catch(fail)});
+}
+async function addProjectPhotos(state, files){
+  if(!files.length || state.uploading) return;
+  state.uploading = true; renderProjectInfo(state);
+  let added = 0, rejected = 0;
+  try{
+    for(const file of files){
+      if(state.data.photos.length >= PROJECT_PHOTO_LIMIT) break;
+      try{
+        const keepOriginal = file.size <= PROJECT_PHOTO_SIZE && /^image\/(jpeg|png|webp|gif)$/.test(file.type);
+        const blob = keepOriginal ? file : await shrink(file);
+        if(blob.size > PROJECT_PHOTO_SIZE){ rejected++; continue; }
+        const id = Array.from(crypto.getRandomValues(new Uint8Array(16)), b=>b.toString(16).padStart(2,"0")).join("");
+        let data;
+        if(LIVE){
+          apiBusy++; apiGen++;
+          try{
+            const r = await apiFetch(`${projectInfoPath(state)}/photos/${id}`, {method:"PUT",
+              headers:{"Authorization":authHeader()}, body:blob}, true);
+            if(!r.ok) throw new Error(r.status);
+            data = await r.json();
+          }finally{ apiBusy--; }
+        }else data = {...state.data, photos:[...state.data.photos, {id, url:URL.createObjectURL(blob)}]};
+        setProjectInfo(state, data); added++;
+      }catch(e){ rejected++; }
+    }
+  }finally{ state.uploading = false; renderProjectInfo(state); }
+  if(!infoIsOpen(state)) return;
+  if(rejected) toast(added ? `Добавлено фото: ${added} · не загрузилось: ${rejected}` : "Не удалось загрузить фото", "warn");
+  else if(added < files.length) toast("В проект можно добавить до 12 фото", "warn");
+  else if(added) toast(added === 1 ? "Фото добавлено" : `Добавлено фото: ${added}`);
+}
+$("#openProjInfo").onclick = ()=>{
+  const state = projectInfo = {id:curProj.id, data:null, error:false, uploading:false};
+  $("#projInfoName").textContent = curProj.name;
+  $("#projInfoActions").hidden = $("#projInfoRetry").hidden = true;
+  go("s-proj-info"); haptic();
+  ghostList([$("#projInfoBody")], ()=>renderProjectInfo(state, true));
+  loadProjectInfo(state);
+};
+$("#projInfoText").onclick = ()=>editProjectInfo(projectInfo);
+$("#projInfoRetry").onclick = ()=>loadProjectInfo(projectInfo);
+$("#projInfoPhoto").onclick = ()=>{ haptic(); $("#projInfoFiles").click(); };
+$("#projInfoFiles").onchange = e=>{
+  const files = [...e.currentTarget.files];
+  e.currentTarget.value = "";
+  addProjectPhotos(projectInfo, files);
+};
 $("#newProjBtn").onclick = ()=>projName(null);
 $("#renameProj").onclick = ()=>projName(curProj);
 /* New task typed by hand: lands in the tab that is open now, the checklist is posted to the chat */
@@ -3935,6 +4102,18 @@ async function poll(){
   lastPoll = Date.now(); liveDirty = false;
   const screen = stack.at(-1), gen = apiGen, pid = curProj?.id, tid = curTask?.id;
   if(screen === "s-task" && !tid) return;
+  if(screen === "s-proj-info"){
+    const info = projectInfo;
+    polling = true;
+    try{
+      const data = await api(projectInfoPath(info), "GET", undefined, true);
+      if(infoIsOpen(info) && gen === apiGen && !pollBlocked() && !info.uploading && JSON.stringify(data) !== JSON.stringify(info.data)){
+        info.error = false; setProjectInfo(info, data);
+      }
+    }catch(_){ /* retry on the next refresh */ }
+    finally{ polling = false; }
+    return;
+  }
   if(screen === "s-history"){ polling = true; try{ await refreshFeed(); }finally{ polling = false; } return; }
   if(screen === "s-notif"){ polling = true; try{ await loadNotif(false, true); }finally{ polling = false; } return; }
   if(screen === "s-people"){ polling = true; try{ await loadPeople(true); }finally{ polling = false; } return; }
@@ -4201,6 +4380,8 @@ function renderDs(){
       "Один компонент для кружка над иконкой или аватаркой: 16 px (--dot-h), центр — на краю под 45° вверху справа (--r — радиус иконки: 21 у аватарки 42, 11 у иконки меню 22), вырез 2 px цветом фона (--ring; у выбранного человека — --surface), цифры 11 px, вес 500, обрезаны до заглавных — по центру и в Safari. Красный (--red) — новое, непрочитанное (колокольчик); тёмный (--accent) — сколько (задачи человека). Новый счётчик — класс .cbdg с --r, без своих размеров и сдвигов.")
     + sec("Бейджи", `<div class="ds-row">${["open","progress","review","backlog","closed","archive"].map(k=>badge(k, STATUS_TXT[k])).join("")}</div><div class="ds-row" style="margin-top:6px">${badge("due","16 ноября")}${badge("late","срок прошёл")}${["Олег","Алексей","Ira","Мария"].map((n, i)=>whoBadge({id: i + 1, name: n})).join("")}${badge("ask","1 вопрос")}${badge("comm","2 комментария")}${badge("time","1,5 ч")}${itemsBadge(1,4)}${itemsBadge(4,4)}${badge("due","Срок",{none:true})}${badge("comm","Комментарии",{none:true})}${badge("time","Время",{none:true})}</div>`,
       "badge(kind, text) · statusBadge(t) · dueBadge(t) · whoBadge(a) · itemsBadge(d, n) · qBadge(t). Исполнитель — свой цвет у каждого человека (--who-0…7 по id, whoColor). Открытые вопросы — фиолетовый «N вопрос» (--k-ask) в строке задачи и тег на экране задачи. Порядок в строке: статус → срок → исполнитель → вопросы → пункты.")
+    + sec("Информация проекта", projectInfoText("Макеты и материалы\nhttps://example.com/project"),
+      "Общая заметка проекта в .descr-box. Длинный текст сохраняет переносы, а ссылки открываются отдельно. Фото под заметкой используют .c-media.")
     + sec("Проект над названием", `<div class="title-edit"><button class="proj-cap" type="button">Проверка сайтов</button><div style="font-size:var(--fs-xl);font-weight:600;letter-spacing:-.025em;line-height:1.15">${esc(sample.title)}</div></div>`,
       ".proj-cap — на экране задачи, серым --fs-s; тап открывает проект. Нет у задач без проекта и у гостя.")
     + sec("Результат", `<div class="ds-row">${badge("closed", "Закрыта")}${badge("res", "Результат · 2,5 ч")}${badge("res", "Результат", {none:true})}</div><div class="res-body"><div class="tx">Поменял цены на капучино и латте</div><a class="res-ln" href="#"><span>example.com/result</span></a><div class="res-h">Потрачено: 2,5 ч</div></div>`,

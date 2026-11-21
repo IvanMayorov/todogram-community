@@ -836,6 +836,94 @@ async def _project_for_user(request) -> int:
     return chat_id
 
 
+PROJECT_INFO_MAX = 20000
+PROJECT_INFO_PHOTO_MAX = 4 * 1024 * 1024
+PROJECT_INFO_PHOTOS = 12
+PROJECT_INFO_PHOTO_ID = re.compile(r"[0-9a-f]{32}")
+
+
+def _project_image_sig(chat_id: int, image_id: str, exp: str | int) -> str:
+    return hmac.new(_media_key(), f"project-info:{chat_id}:{image_id}:{exp}".encode(), "sha256").hexdigest()[:32]
+
+
+async def _project_info(chat_id: int) -> dict:
+    p = await db.one("SELECT info, info_revision FROM projects WHERE chat_id=?", (chat_id,))
+    if p is None:
+        raise web.HTTPNotFound(text="project not found")
+    rows = await db.all("SELECT id FROM project_info_images WHERE chat_id=? AND removed_at IS NULL ORDER BY rowid", (chat_id,))
+    exp = _stable_exp()
+    return {"text": p["info"], "revision": p["info_revision"], "photos": [
+        {"id": image_id, "url": f"/api/projects/{chat_id}/info/photos/{image_id}?e={exp}&s={_project_image_sig(chat_id, image_id, exp)}"}
+        for image_id in (row["id"] for row in rows)
+    ]}
+
+
+async def api_project_info(request):
+    chat_id = await _project_for_user(request)
+    if request.method == "PUT":
+        body = await request.json()
+        if not isinstance(body, dict):
+            raise web.HTTPBadRequest(text="invalid project info")
+        text, revision = body.get("text"), body.get("revision")
+        if not isinstance(text, str) or len(text) > PROJECT_INFO_MAX or type(revision) is not int or not 0 <= revision < 2**63:
+            raise web.HTTPBadRequest(text="invalid project info")
+        text = text.strip()
+        result = await db.x("UPDATE projects SET info=?, info_revision=info_revision+1 "
+                            "WHERE chat_id=? AND info_revision=? AND info<>?", (text, chat_id, revision, text))
+        current = await _project_info(chat_id)
+        if not result.rowcount and current["text"] != text:
+            raise web.HTTPConflict(text="project info changed")
+        return web.json_response(current)
+    return web.json_response(await _project_info(chat_id))
+
+
+async def api_project_info_photo(request):
+    image_id = request.match_info["image_id"]
+    if not PROJECT_INFO_PHOTO_ID.fullmatch(image_id):
+        raise web.HTTPNotFound()
+    if request.method == "GET":
+        chat_id = int(request.match_info["chat_id"])
+        exp, sig = request.query.get("e", ""), request.query.get("s", "")
+        if not re.fullmatch(r"[0-9]{1,12}", exp) or int(exp) < time.time() or not PROJECT_INFO_PHOTO_ID.fullmatch(sig):
+            raise web.HTTPForbidden()
+        if not hmac.compare_digest(_project_image_sig(chat_id, image_id, exp), sig):
+            raise web.HTTPForbidden()
+        image = await db.one("SELECT data, mime FROM project_info_images WHERE chat_id=? AND id=? AND removed_at IS NULL",
+                             (chat_id, image_id))
+        if image is None:
+            raise web.HTTPNotFound()
+        return web.Response(body=image["data"], content_type=image["mime"],
+                            headers={"Cache-Control": "private, max-age=60", "X-Content-Type-Options": "nosniff"})
+
+    chat_id = await _project_for_user(request)
+    key = (chat_id, image_id)
+    if request.method == "PUT":
+        data = bytearray()
+        async for chunk in request.content.iter_chunked(256 * 1024):
+            data.extend(chunk)
+            if len(data) > PROJECT_INFO_PHOTO_MAX:
+                raise web.HTTPRequestEntityTooLarge(max_size=PROJECT_INFO_PHOTO_MAX, actual_size=len(data))
+        kind = cfile_kind(data[:16])
+        if not kind or kind[1] != "photo":
+            raise web.HTTPUnsupportedMediaType(text="only JPEG, PNG, WebP or GIF")
+        await db.x("INSERT OR IGNORE INTO project_info_images(chat_id,id,mime,data) "
+                   "SELECT ?,?,?,? WHERE EXISTS(SELECT 1 FROM projects WHERE chat_id=?) "
+                   "AND (SELECT COUNT(*) FROM project_info_images WHERE chat_id=? AND removed_at IS NULL) < ?",
+                   (chat_id, image_id, CFILE_TYPES[kind[0]], bytes(data), chat_id, chat_id, PROJECT_INFO_PHOTOS))
+        if not await db.one("SELECT 1 FROM project_info_images WHERE chat_id=? AND id=?", key):
+            raise web.HTTPConflict(text="photo limit reached")
+    elif request.method == "DELETE":
+        await db.x("UPDATE project_info_images SET removed_at=? WHERE chat_id=? AND id=? AND removed_at IS NULL",
+                   (int(time.time()), *key))
+    else:  # undo photo removal
+        result = await db.x("UPDATE project_info_images SET removed_at=NULL WHERE chat_id=? AND id=? "
+                            "AND (removed_at IS NULL OR (SELECT COUNT(*) FROM project_info_images "
+                            "WHERE chat_id=? AND removed_at IS NULL) < ?)", (*key, chat_id, PROJECT_INFO_PHOTOS))
+        if not result.rowcount:
+            raise web.HTTPConflict(text="photo cannot be restored")
+    return web.json_response(await _project_info(chat_id))
+
+
 async def api_access(request):
     """The invite link and who came in by it."""
     return web.json_response(await _access_json(request, await _project_for_user(request)))
@@ -2141,6 +2229,10 @@ def make_app(bot: Bot) -> web.Application:
     r.add_post("/api/join", api_join)
     r.add_put("/api/projects/{chat_id}/order", api_task_order)
     r.add_get("/api/projects/{chat_id}/people", api_project_people)
+    r.add_get("/api/projects/{chat_id}/info", api_project_info)
+    r.add_put("/api/projects/{chat_id}/info", api_project_info)
+    for method in ("GET", "PUT", "DELETE", "PATCH"):
+        r.add_route(method, "/api/projects/{chat_id}/info/photos/{image_id}", api_project_info_photo)
     r.add_get("/api/people/tasks", api_people_tasks)
     r.add_get("/static/{name:app\\.(?:css|js)}", app_asset)
     from . import agent_api   # here, not at the top: it imports from this module
