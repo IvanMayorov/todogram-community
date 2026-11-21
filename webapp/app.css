@@ -1,0 +1,1096 @@
+/* Mini app styles (the page is webapp/index.html; rules: docs/DESIGN.md) */
+/* ---------- Tokens: Telegram theme vars with KokonutUI-like zinc defaults ---------- */
+:root{
+  --bg: var(--tg-theme-bg-color, #ffffff);
+  --bg2: var(--tg-theme-secondary-bg-color, #f4f4f5);
+  --text: var(--tg-theme-text-color, #09090b);
+  --hint: var(--tg-theme-hint-color, #71717a);
+  --link: var(--tg-theme-link-color, #2563eb);
+  --accent: var(--tg-theme-button-color, #18181b);
+  --accent-text: var(--tg-theme-button-text-color, #fafafa);
+  --border: #e4e4e7;
+  --dash: #c4c4cc;   /* dashed «add» outlines: a step stronger than --border, or they vanish */
+  --card: #ffffff;
+  --surface: var(--bg);
+  --fill: var(--muted);
+  --on-fill: var(--bg);
+  --sunk: color-mix(in srgb, var(--fill), #000 6%);   /* a tile pressed into the list (the «+» of «Создать задачу») */     /* the grey of the project and task lists; in dark themes the raised card colour */   /* outlined blocks: the screen colour plus a border; filled --card is for the project and task lists only */
+  --muted: #f4f4f5;
+  --green: #16a34a;
+  --green-soft: #dcfce7;
+  --red: #e11d48;
+  --blue: #0ea5e9;
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px -8px rgba(0,0,0,.08);
+  --page: #fafafa;
+  color-scheme: light;
+
+  /* ---- design tokens: every size, radius and shadow below comes from here ---- */
+  --r-s: 8px;      /* badges, chips, small icons */
+  --r-m: 12px;     /* buttons, fields, rows inside blocks */
+  --r-l: 16px;     /* blocks and lists */
+  --r-xl: 22px;    /* pop-ups */
+  --r-full: 999px;
+  --font: "TikTok Sans", system-ui, sans-serif;   /* the one typeface; its width axis does the hierarchy */
+  --wd-head: 112%;   /* headings: screen, pop-up, the task's title — a bit wider */
+  --wd-list: 92%;    /* names in lists: tasks, projects, items, feeds, search — a bit narrower, more fits */
+  --fs-xs: 11px;   /* section labels (capitals), counters */
+  --fs-s: 12.5px;  /* captions, meta */
+  --fs-m: 14px;    /* secondary text, buttons */
+  --fs-base: 15px; /* body */
+  --fs-input: 16px;/* fields: less makes iOS zoom in */
+  --fs-l: 17px;    /* card and pop-up titles */
+  --fs-xl: 22px;   /* numbers */
+  --fs-2xl: 30px;  /* screen titles */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 24px;
+  --pad: 14px;     /* inside every block and row */
+  --row-h: 48px;   /* one-line rows and link rows */
+  --btn-h: 44px;   /* buttons in pop-ups */
+  --act-h: 44px;   /* actions of a screen: tiles .foot-grid and link rows */
+  --act-line: color-mix(in srgb, var(--link) 16%, transparent);   /* their outline: the text colour, barely there */
+  /* vertical rhythm of a screen: one of three gaps between stacked blocks, nothing in between */
+  --gap-in: var(--sp-2);      /* inside a group: link rows in a row, tiles, settings rows, fields of a pop-up */
+  --gap-block: var(--sp-4);   /* between blocks: content → its actions, filters / stats → the list */
+  --gap-sec: var(--sp-6);     /* before a section label (.sec-label) */
+  /* bottom sheets / pop-ups: one rhythm for every .sheet .card (4/8 scale on --sp-*) */
+  --sheet-pad: var(--sp-4);      /* 16 — padding inside the card */
+  --sheet-gap: var(--gap-in);    /* 8 — uniform gap between fields and blocks */
+  --sheet-head: var(--gap-block);/* 16 — heading → first field */
+  --sheet-foot: var(--gap-block);/* 16 — last content → action buttons */
+  --sheet-hint: var(--sp-1);     /* 4 — field → its own hint (tighter than sheet-gap) */
+  --sh-1: 0 1px 3px rgba(0,0,0,.14);            /* knobs, the active segment */
+  --sh-2: 0 12px 30px -10px rgba(0,0,0,.35);    /* something lifted: a dragged row, a sliding screen */
+  --sh-3: 0 -10px 40px -20px rgba(0,0,0,.4);    /* pop-ups and the demo phone */
+  --c-blue: #0ea5e9; --c-violet: #8b5cf6; --c-gray: #71717a;   /* swipe actions */
+  --amber: #d97706;   /* warnings */
+  /* ---- kinds: every status / badge colour, used as --bc of a .bdg and wherever the kind is shown ---- */
+  --st-open: #64748b; --st-progress: #f59e0b; --st-review: #0ea5e9; --st-backlog: #8b5cf6; --st-closed: #16a34a; --st-archive: #71717a;
+  --k-due: #2563eb; --k-late: #dc2626; --k-who: #0891b2; --k-comm: #db2777; --k-time: #ea580c; --k-ask: #7c3aed;
+  /* who does the task: each person keeps one of these on their badge, so rows are told apart at a glance */
+  --who-0: #0891b2; --who-1: #4f46e5; --who-2: #0d9488; --who-3: #e11d48; --who-4: #65a30d; --who-5: #c026d3; --who-6: #b45309; --who-7: #0369a1;
+  --hl: rgba(250,204,21,.38);   /* the found words in search results; a row jumped to from search */
+  /* ---- icons: 24-grid, round ends; one size per place ---- */
+  --ic-s: 13px;    /* in badges (stroke 2.2) */
+  --ic-m: 18px;    /* in rows, buttons, tiles (stroke 1.7) */
+  --ic-l: 22px;    /* tab bar, big buttons (stroke 1.8) */
+  --ic-xl: 64px;   /* the splash: the app's tick drawn while it loads (stroke 1.5) */
+  --bdg-h: 22px; --fs-bdg: 12px;   /* badges */
+  --dot-h: 16px;   /* red unread counters: on the menu icon, in chips */
+  --chip-h: 30px;  /* filter chips (.feed-bar) */
+  --on-color: #fff;     /* text and icons on a coloured fill (avatars, swipe actions, the switch knob) */
+  --photo-bg: #000;     /* the photo viewer */
+  --scrim: rgba(0,0,0,.28);                     /* behind pop-ups (plus blur) */
+  --glass: rgba(120,120,128,.36); --glass-on: rgba(120,120,128,.5);   /* round buttons over photos */
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#09090b; --bg2:#09090b; --text:#fafafa; --hint:#a1a1aa; --link:#60a5fa;
+    --accent:#fafafa; --accent-text:#09090b; --border:#27272a; --dash:#52525b; --card:#111113; --muted:#18181b; --fill:var(--card); --on-fill:var(--muted); --sunk:color-mix(in srgb, var(--fill), #000 22%);
+    --green:#22c55e; --green-soft:rgba(34,197,94,.14); --shadow:none; --page:#000; --hl:rgba(250,204,21,.3); color-scheme:dark;
+    --who-1:#818cf8; --who-3:#fb7185; --who-6:#f59e0b; --who-7:#38bdf8; --k-ask:#a78bfa;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#09090b; --bg2:#09090b; --text:#fafafa; --hint:#a1a1aa; --link:#60a5fa;
+  --accent:#fafafa; --accent-text:#09090b; --border:#27272a; --dash:#52525b; --card:#111113; --muted:#18181b; --fill:var(--card); --on-fill:var(--muted); --sunk:color-mix(in srgb, var(--fill), #000 22%);
+  --green:#22c55e; --green-soft:rgba(34,197,94,.14); --shadow:none; --page:#000; --hl:rgba(250,204,21,.3); color-scheme:dark;
+    --who-1:#818cf8; --who-3:#fb7185; --who-6:#f59e0b; --who-7:#38bdf8; --k-ask:#a78bfa;
+}
+
+/* Inside Telegram: take colours from the user's Telegram theme — unless they picked the other one in Settings */
+:root.own-theme[data-theme="light"]{
+  --bg:#ffffff; --bg2:#f4f4f5; --text:#09090b; --hint:#71717a; --link:#2563eb; --accent:#18181b; --accent-text:#fafafa; --page:#fafafa;
+}
+:root.tg[data-theme]:not(.own-theme){
+  --bg: var(--tg-theme-bg-color);
+  --page: var(--tg-theme-bg-color);
+  --text: var(--tg-theme-text-color);
+  --hint: var(--tg-theme-hint-color);
+  --link: var(--tg-theme-link-color);
+  --card: var(--tg-theme-section-bg-color, var(--tg-theme-bg-color));
+  --muted: var(--tg-theme-secondary-bg-color);
+}
+:root.tg .stage{padding:0;display:block}
+:root.tg .side, :root.tg .tg-head{display:none}
+:root.tg .phone{width:100%;height:var(--tg-viewport-stable-height,100vh);border-radius:0;border:0;box-shadow:none}
+:root.tg .screens{inset:0}
+button:focus:not(:focus-visible){outline:none}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;touch-action:manipulation;-webkit-text-size-adjust:100%}
+input,textarea,select{font-size:var(--fs-input)}
+body{background:var(--page);color:var(--text);font-family:var(--font);font-size:var(--fs-base);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,textarea{font:inherit;color:inherit;caret-color:var(--link)}
+
+/* ---------- Device frame (desktop only) ---------- */
+.stage{min-height:100%;display:flex;align-items:center;justify-content:center;gap:32px;padding:24px}
+.phone{width:390px;height:min(800px,calc(100dvh - 48px));min-height:560px;border-radius:44px;border:1px solid var(--border);background:var(--bg);position:relative;overflow:hidden;box-shadow:var(--sh-3)}
+.side{max-width:260px;display:flex;flex-direction:column;gap:var(--sp-4)}
+.side h1{font-size:var(--fs-2xl);line-height:1.05;letter-spacing:-.03em;font-weight:600}
+.side p{color:var(--hint);font-size:var(--fs-m);line-height:1.5}
+.tag{font-size:var(--fs-xs);color:var(--green);letter-spacing:.02em}
+.seg-mini{display:inline-flex;border:1px solid var(--border);border-radius:var(--r-s);padding:3px;gap:2px;background:var(--surface)}
+.seg-mini button{padding:6px 10px;border-radius:var(--r-s);font-size:var(--fs-s);color:var(--hint)}
+.seg-mini button.on{background:var(--muted);color:var(--text)}
+@media (max-width:640px){
+  .stage{padding:0;display:block}
+  .side{display:none}
+  .phone{width:100%;height:100dvh;border-radius:0;border:0;box-shadow:none}
+}
+
+/* ---------- The site (outside Telegram): a plain column, no device frame ---------- */
+:root.site .stage{padding:0;display:block}
+:root.site .side{display:none}
+:root.site .phone{width:min(480px,100%);height:100dvh;margin:0 auto;border-radius:0;border-top:0;border-bottom:0;box-shadow:none}
+:root.site .tg-head .ttl span{display:none}
+/* a wide window (the site, or Telegram Desktop stretched out): two panes — the list on the left (with its menu), the open task on the right */
+@media (min-width:960px){
+  :root.wide{--list-w:420px}
+  :root.site .phone{width:min(1200px,100%);border-left:1px solid var(--border);border-right:1px solid var(--border)}
+  /* list screens slide inside the left pane only: the clip moves with the screen, so nothing shows past the pane's edge */
+  :root.wide .screen{right:auto;width:var(--list-w);clip-path:inset(0);transition:transform .38s cubic-bezier(.32,.72,0,1),clip-path .38s cubic-bezier(.32,.72,0,1),opacity .3s}
+  :root.wide .screen.off-right{clip-path:inset(0 100% 0 0)}
+  :root.wide .screen.off-left{clip-path:inset(0 0 0 28%)}
+  :root.wide #s-task{left:var(--list-w);right:0;width:auto;bottom:calc((var(--tab-h) + env(safe-area-inset-bottom)) * -1);border-left:1px solid var(--border);padding:var(--sp-6) var(--sp-6) 120px}
+  :root.wide #s-task{clip-path:none;transition:transform .3s cubic-bezier(.32,.72,0,1),opacity .22s}
+  :root.wide #s-task.off-right{transform:translateX(24px);opacity:0;pointer-events:none}   /* the task pane: a short fade, not a slide across */
+  :root.wide .screen.under{transform:none;opacity:1;pointer-events:auto;clip-path:inset(0)}   /* the list the open task came from stays */
+  :root.wide .tabbar{right:auto;width:var(--list-w)}
+  :root.wide .wide-empty{display:flex}
+  :root.wide .task.sel{background:var(--muted)}
+  :root.wide .sheet{align-items:center;justify-content:center}
+  :root.wide .sheet .card{width:min(460px,calc(100% - 40px));margin:20px}
+  :root.wide .toast{left:50%;right:auto;width:420px;margin-left:-210px}
+  :root.site .tg-head .ttl{left:calc(var(--list-w) / 2)}
+  /* Telegram Desktop stretched wide: the same two panes, no header of ours, the tab bar over the screens */
+  :root.tg #s-task{bottom:0}
+  :root.tg .wide-empty{top:0}
+}
+.wide-empty{display:none;position:absolute;top:52px;bottom:0;left:var(--list-w,420px);right:0;align-items:center;justify-content:center;color:var(--hint);font-size:var(--fs-base);border-left:1px solid var(--border);pointer-events:none}
+
+/* sign in through the bot */
+/* Splash: while the first data loads, the frame and the tick of the logo draw themselves in grey, then it fades */
+:root.site .splash{display:none}   /* the site: no Telegram loading screen to carry on, the skeletons are enough */
+.splash{position:absolute;inset:0;z-index:80;display:grid;place-items:center;background:var(--bg);color:var(--hint);transition:opacity .3s}
+.splash.out{opacity:0;pointer-events:none}
+.splash-ic{width:var(--ic-xl);height:var(--ic-xl)}
+.splash-ic path{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .55s cubic-bezier(.65,0,.35,1) forwards}
+.splash-ic path + path{animation-duration:.35s;animation-delay:.4s}
+@keyframes draw{to{stroke-dashoffset:0}}
+.login{position:absolute;inset:0;z-index:70;background:var(--bg);display:flex;flex-direction:column;justify-content:center;gap:var(--sp-4);padding:var(--sp-6)}
+.login[hidden]{display:none}
+.login .h-big{margin:0}
+.login p{color:var(--hint);font-size:var(--fs-base);line-height:1.45}
+.login .go{display:flex;align-items:center;justify-content:center;gap:var(--sp-2);min-height:var(--btn-h);border-radius:var(--r-m);background:var(--accent);color:var(--accent-text);font-weight:500;text-decoration:none}
+.login .go[aria-disabled="true"]{opacity:.5;pointer-events:none}
+.login .st{min-height:1.4em;font-size:var(--fs-s);color:var(--hint)}
+
+/* ---------- Telegram chrome (header imitation) ---------- */
+.tg-head{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--border);background:var(--bg);position:relative;z-index:5}
+.tg-head .btn{height:32px;min-width:32px;padding:0 10px;border-radius:var(--r-full);display:flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-m);color:var(--hint);transition:background .15s}
+.tg-head .btn:active{background:var(--muted)}
+.tg-head .ttl{position:absolute;left:50%;transform:translateX(-50%);text-align:center;line-height:1.15}
+.tg-head .ttl b{font-weight:600;font-size:var(--fs-base);display:block}
+.tg-head .ttl span{font-size:var(--fs-xs);color:var(--hint)}
+
+/* ---------- Screens ---------- */
+/* pull to refresh, as in Safari: the screen itself is pulled down; in the gap above it the icon shows up,
+   and past the point it "clicks" — fills with colour — and the release reloads */
+.ptr{position:absolute;top:0;left:50%;z-index:0;width:calc(var(--ic-l) + var(--sp-3));height:calc(var(--ic-l) + var(--sp-3));margin-left:calc((var(--ic-l) + var(--sp-3)) / -2);display:grid;place-items:center;color:var(--hint);opacity:0;transform:scale(.6);pointer-events:none}
+.ptr svg{width:calc(var(--ic-l) + var(--sp-1));height:calc(var(--ic-l) + var(--sp-1))}   /* a grey icon, no circle under it */
+.ptr.spin svg{animation:ptr-spin .8s linear infinite}
+@keyframes ptr-spin{to{transform:rotate(360deg)}}
+.screen.pulling{transition:none}
+.screens{position:absolute;inset:52px 0 calc(var(--tab-h) + env(safe-area-inset-bottom)) 0;overflow:hidden}
+:root{--tab-h:52px}
+/* one menu on every screen: mine, everyone's, history */
+.tabbar{position:absolute;left:0;right:0;bottom:0;z-index:40;display:flex;height:calc(var(--tab-h) + env(safe-area-inset-bottom));padding:0 6px env(safe-area-inset-bottom);background:var(--bg);border-top:1px solid var(--border)}
+.tabbar button{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;color:var(--hint);transition:color .15s,transform .15s}
+.tabbar button:active{transform:scale(.92)}
+.tabbar button.on{color:var(--link)}
+.tabbar button{position:relative}
+/* red counters of unread: on the menu icon and in the chips of «Уведомления» */
+.feed-bar .n.u{display:inline-grid;place-items:center;min-width:var(--dot-h);height:var(--dot-h);padding:0 var(--sp-1);border-radius:var(--r-full);background:var(--red);color:var(--on-color);font-size:var(--fs-xs);font-weight:500;line-height:1}
+/* Counter over an icon or an avatar — one component everywhere (the bell in the menu, people in «Задачи людей»):
+   a 16 px pill whose centre sits on the icon's edge at 45° up-right (--r: the icon's radius, set per place), cut out of
+   what is under it by a 2 px ring of the background (--ring), 11 px digits of weight 500, trimmed to the capitals so they
+   sit in the middle in Safari too. Colour by meaning: red — new (unread), dark — how many */
+.cbdg,.tb-n,.ppl-bar .cnt{position:absolute;left:calc(50% + var(--r) * .7071);top:calc(50% - var(--r) * .7071);transform:translate(-50%,-50%);
+  display:grid;place-items:center;min-width:var(--dot-h);height:var(--dot-h);padding:0 var(--sp-1);border-radius:var(--r-full);
+  font-size:var(--fs-xs);font-weight:500;line-height:1;box-shadow:0 0 0 2px var(--ring,var(--bg));pointer-events:none}
+.tb-n{--r:calc(var(--ic-l) / 2);background:var(--red);color:var(--on-color)}
+.tb-n[hidden]{display:none}
+.tb-n,.feed-bar .n.u,.cbdg{text-box:trim-both cap alphabetic}
+/* a counter in a chip sits concentric with the chip's round end: equal gap above, below and to the right
+   (chip 30 high, radius 15 → the counter 20, radius 10, gap 5 = border 1 + padding 4) */
+.feed-bar button:has(.n.u){padding-right:var(--sp-1)}
+.feed-bar .l{text-box:trim-both cap alphabetic}   /* the label in the optical middle on iOS too (see .bdg>span) */
+.feed-bar .n.u{min-width:calc(var(--dot-h) + var(--sp-1));height:calc(var(--dot-h) + var(--sp-1));padding:0 var(--sp-1)}
+body:has(:is(input,textarea,[contenteditable="true"]):focus) .tabbar{display:none}
+body:has(:is(input,textarea,[contenteditable="true"]):focus) .screens{bottom:0}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:16px 16px calc(120px + var(--kb,0px));transition:transform .38s cubic-bezier(.32,.72,0,1),opacity .3s;background:var(--bg)}
+.screen.off-right{transform:translateX(100%)}
+.screen.off-left{transform:translateX(-28%);opacity:0;pointer-events:none}
+/* switching a tab of the menu: screens change in place (no slide), the new one fades up; a step inside one screen
+   («Мои задачи» → «Все задачи») slides like going to the next screen, and Back slides it the other way */
+:root.tab-swap .screen{transition:none!important}
+.screen.tab-in{animation:tabIn .24s cubic-bezier(.32,.72,0,1) both}
+.screen.slide-fwd{animation:slideFwd .38s cubic-bezier(.32,.72,0,1) both}
+.screen.slide-back{animation:slideBack .38s cubic-bezier(.32,.72,0,1) both}
+@keyframes tabIn{from{opacity:0;transform:translateY(var(--sp-2))}}
+@keyframes slideFwd{from{transform:translateX(100%)}}
+@keyframes slideBack{from{transform:translateX(-28%);opacity:0}}
+.screen.edge-drag{box-shadow:var(--sh-2)}
+.screen::-webkit-scrollbar{display:none}
+
+.eyebrow{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3);margin:6px 2px 10px}
+.eyebrow[hidden]{display:none}
+.eyebrow .eb-link{flex:none}
+.eyebrow .eb-link+.mono.r,.eyebrow .eb-grp+.mono.r{min-width:0;text-align:right}
+.eyebrow .eb-grp{display:flex;gap:var(--sp-4,16px);flex:none}
+.eyebrow .mono{font-size:var(--fs-xs);color:var(--green)}
+.eyebrow .mono.r{color:var(--hint)}
+.h-big{font-size:var(--fs-2xl);font-weight:600;letter-spacing:-.035em;line-height:1.02;margin:2px 2px var(--gap-block)}
+
+/* Card list — kokonut-style bordered grid */
+.grid{border:1px solid var(--border);border-radius:var(--r-l);overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
+.row{display:flex;align-items:center;gap:var(--sp-3);padding:var(--pad);border-top:1px solid var(--border);width:100%;text-align:left;transition:background .15s;touch-action:pan-y;position:relative}
+.row:first-child{border-top:0}
+.row:active{background:var(--muted)}
+.row.lift{z-index:10;box-shadow:var(--sh-2);border-radius:var(--r-m);border-top-color:transparent;background:var(--fill)}
+#projList:has(.lift){overflow:visible}
+.ava{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:var(--fs-base);color:var(--on-color);flex:none;position:relative;overflow:hidden}
+.ava img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ava.sk{border-radius:50%}   /* the loading skeleton (.sk) sets its own radius further down */
+.row .main{flex:1;min-width:0}
+.row .t{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .s{font-size:var(--fs-s);color:var(--hint);margin-top:2px}
+.pill{font-size:var(--fs-s);padding:3px 8px;border-radius:var(--r-full);background:var(--muted);color:var(--text);font-weight:500}
+.pill.zero{color:var(--hint)}
+.chev{color:var(--hint);flex:none}
+
+/* Stats strip */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);border-radius:var(--r-l);overflow:hidden;margin-bottom:var(--gap-block);background:var(--surface)}
+.stats div{padding:var(--pad);border-left:1px solid var(--border)}
+.stats div:first-child{border-left:0}
+.stats .mono{font-size:var(--fs-xs);color:var(--hint);text-transform:uppercase;letter-spacing:.04em}
+.stats b{display:block;font-size:var(--fs-xl);font-weight:600;letter-spacing:-.02em;margin-top:4px}
+.stats b small{font-size:var(--fs-s);color:var(--hint);font-weight:500}
+
+/* Segmented filter with sliding pill */
+.seg-wrap{position:relative;margin-bottom:var(--gap-block);border-radius:var(--r-m);overflow:hidden}
+.seg{position:relative;isolation:isolate;display:flex;gap:2px;background:var(--muted);border-radius:var(--r-m);padding:3px;
+  overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.seg::-webkit-scrollbar{display:none}
+/* edge fades sit on top in the menu's own colour, so the grey pill never goes see-through */
+.seg-wrap::before,.seg-wrap::after{content:"";position:absolute;top:0;bottom:0;width:30px;z-index:2;pointer-events:none;opacity:0;transition:opacity .25s}
+.seg-wrap::before{left:0;background:linear-gradient(90deg,var(--muted) 15%,transparent)}
+.seg-wrap::after{right:0;background:linear-gradient(270deg,var(--muted) 15%,transparent)}
+.seg-wrap.fl::before,.seg-wrap.fr::after{opacity:1}
+/* iOS: inside a scrolling box a moving (composited) pill is painted over the labels unless they get their own layer too */
+.seg button{position:relative;z-index:1;transform:translateZ(0);flex:none;padding:8px 13px;font-size:var(--fs-s);white-space:nowrap;font-weight:500;color:var(--hint);transition:color .2s}
+.seg button.on{color:var(--text)}
+.seg .knob{position:absolute;z-index:0;top:3px;bottom:3px;left:0;width:0;will-change:transform;background:var(--card);border-radius:var(--r-s);box-shadow:var(--sh-1);transition:transform .35s cubic-bezier(.32,.72,0,1),width .35s cubic-bezier(.32,.72,0,1)}
+.seg .knob.instant{transition:none}
+/* status picker */
+.acc-note{font-size:var(--fs-s);color:var(--hint);line-height:1.4;margin:0}   /* spacing from .sheet .card gap */
+.acc-btns{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}
+.acc-btns button{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;border-radius:var(--r-m);background:var(--muted);font-weight:500}
+.acc-btns .primary{background:var(--accent);color:var(--accent-text)}
+.acc-sub{font-size:var(--fs-s);color:var(--hint);margin:0}   /* spacing from .sheet .card gap */
+.acc-list{display:flex;flex-direction:column;gap:var(--sp-2);max-height:40vh;overflow-y:auto;scrollbar-width:none}
+.acc-list::-webkit-scrollbar{display:none}
+.acc-row{display:flex;align-items:center;gap:var(--sp-3);padding:8px 8px 8px 10px;border-radius:var(--r-m);background:var(--surface);border:1px solid var(--border)}
+.acc-row .pav{position:relative;width:32px;height:32px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:var(--fs-s);font-weight:600;color:var(--on-color);overflow:hidden}
+.acc-row .pav img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.acc-row .nm{flex:1;min-width:0;font-weight:500}
+.acc-row .nm span{display:block;font-size:var(--fs-s);color:var(--hint);font-weight:400}
+.acc-row .rm{width:36px;height:36px;display:grid;place-items:center;color:var(--hint);border-radius:var(--r-s)}
+.acc-empty{font-size:var(--fs-s);color:var(--hint);padding:4px 2px}
+.acc-reset{font-size:var(--fs-s);color:var(--red);margin:0;padding:2px 0;align-self:flex-start}
+.st-list{display:flex;flex-direction:column;gap:var(--sp-2)}
+.st-list button{display:flex;align-items:center;gap:var(--sp-3);padding:12px 14px;border-radius:var(--r-m);background:var(--surface);border:1px solid var(--border);text-align:left;font-weight:500}
+.st-list button .ic{width:30px;height:30px;border-radius:var(--r-s);display:grid;place-items:center;color:var(--on-color);flex:none}
+.st-list button .sub{display:block;font-size:var(--fs-s);color:var(--hint);font-weight:400;margin-top:1px}
+.st-list button .ck{margin-left:auto;color:var(--link);opacity:0}
+.st-list button.on{border-color:var(--link)}
+.st-list button.on .ck{opacity:1}
+/* Deadline: chip under the title, sheet with quick days, date, time and personal reminders */
+.due-quick{display:flex;gap:var(--sp-2);flex-wrap:wrap}
+.due-quick button{padding:8px 12px;border-radius:var(--r-full);background:var(--muted);font-size:var(--fs-s);font-weight:500}
+.due-quick button.on{background:var(--link);color:var(--on-color)}
+.due-pick{display:flex;gap:var(--sp-2);margin:0}
+.due-pick .dp{flex:1;min-width:0;position:relative;display:block}
+.due-pick #dueTimeW{flex:0 0 38%}
+/* iOS shows an empty date/time field as a blank box: a caption sits on top until a value is picked */
+.due-pick .ph{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--hint);font-size:var(--fs-input);pointer-events:none;display:none}
+.due-pick .dp.blank .ph{display:block}
+.due-pick .dp.blank input{color:transparent}
+.due-pick .dp.blank input::-webkit-datetime-edit{color:transparent}
+.due-pick input{width:100%;border:1px solid var(--border);background:var(--surface);border-radius:var(--r-m);padding:10px 12px;font-size:var(--fs-input);color:var(--text);outline:none;font-family:inherit;-webkit-appearance:none;appearance:none;min-height:44px}
+.due-pick input:focus{border-color:var(--link)}
+.due-notime{font-size:var(--fs-s);color:var(--link);margin:0;padding:2px 0;align-self:flex-start}
+.due-notime[hidden]{display:none}
+.task .meta{flex-wrap:wrap;row-gap:4px}
+.task .meta .t-proj{flex:1 1 0;min-width:5em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--fs-s);color:var(--hint)}   /* «Мои задачи» without a project filter: whose task it is */
+.bdg{--bc:var(--st-open);display:inline-flex;align-items:center;gap:var(--sp-1);height:var(--bdg-h);padding:0 8px 0 6px;border-radius:var(--r-full);font-size:var(--fs-bdg);font-weight:500;line-height:1;white-space:nowrap;max-width:100%;flex:none;
+  color:color-mix(in srgb,var(--bc) 78%,var(--text));background:color-mix(in srgb,var(--bc) 14%,transparent);transition:transform .15s}
+.bdg svg{width:var(--ic-s);height:var(--ic-s);flex:none;color:var(--bc)}
+.bdg span{overflow:hidden;text-overflow:ellipsis}
+.bdg .bell{display:inline-flex;margin-left:2px}
+/* style guide (s-ds) */
+.ds-sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px}
+.ds-sw div{border:1px solid var(--border);border-radius:var(--r-m);overflow:hidden;background:var(--surface);font-size:var(--fs-xs)}
+.ds-sw i{display:block;height:40px}
+.ds-sw span{display:block;padding:6px 8px;color:var(--hint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ds-rhythm{display:flex;flex-direction:column;gap:var(--sp-2)}
+.ds-rhythm div{display:flex;align-items:center;gap:var(--sp-3);font-size:var(--fs-s);color:var(--hint)}
+.ds-rhythm i{width:var(--sp-6);background:color-mix(in srgb, var(--link) 25%, transparent)}
+.ds-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ds-type > div{display:flex;align-items:baseline;gap:10px;padding:6px 0;border-top:1px solid var(--border)}
+.ds-type > div:first-child{border-top:0}
+.ds-type code,.ds-note code{font-family:inherit;font-size:var(--fs-xs);color:var(--hint)}
+.ds-type code{flex:none;width:88px}
+.ds-rad{display:flex;gap:10px;flex-wrap:wrap}
+.ds-rad div{width:64px;height:48px;border:1.5px solid var(--link);background:color-mix(in srgb,var(--link) 8%,transparent);display:grid;place-items:end center;padding-bottom:4px;font-size:var(--fs-xs);color:var(--hint)}
+.ds-splash{display:grid;place-items:center;width:100%;padding:var(--sp-6) 0;color:var(--hint)}
+.ds-ic{display:flex;gap:18px;align-items:flex-end;color:var(--text)}
+.ds-ic div{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:var(--fs-xs);color:var(--hint)}
+.ds-note{font-size:var(--fs-s);color:var(--hint);margin-top:8px;line-height:1.4}
+.sheet.ds-static{position:static;opacity:1;visibility:visible;pointer-events:auto;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;display:block;padding:0}
+.sheet.ds-static .card{opacity:1;transform:none;margin:0;width:100%}
+.bdg.none{--bc:var(--hint);color:var(--hint);background:none;box-shadow:inset 0 0 0 1px var(--border)}   /* not set yet: no fill, a thin grey outline */
+.bdg.plain{--bc:var(--hint);color:var(--hint);background:none;padding:0;font-weight:400}   /* the items counter: grey text, no pill */
+button.bdg:active{transform:scale(.94)}
+.due-sub{font-size:var(--fs-s);color:var(--hint);margin:0;display:flex;align-items:center;gap:6px}
+.rem-list{display:flex;flex-direction:column;gap:var(--sp-2)}
+.rem-list button{display:flex;align-items:center;gap:var(--sp-3);padding:11px 14px;border-radius:var(--r-m);background:var(--surface);border:1px solid var(--border);text-align:left;font-weight:500;font-size:var(--fs-m)}
+.rem-list button .sub{display:block;font-size:var(--fs-s);color:var(--hint);font-weight:400;margin-top:1px}
+.rem-list button .box{margin-left:auto;width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border);display:grid;place-items:center;color:transparent;flex:none}
+.rem-list button.on{border-color:var(--link)}
+.rem-list button.on .box{background:var(--link);border-color:var(--link);color:var(--on-color)}
+.rem-note{font-size:var(--fs-s);color:var(--hint);margin:0;line-height:1.35}
+/* Assignee: chip on the task screen, picker sheet, name on task cards */
+.pav-s{position:relative;width:18px;height:18px;border-radius:50%;flex:none;display:inline-grid;place-items:center;font-size:10px;font-weight:600;color:var(--on-color);overflow:hidden}
+.pav-s img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.as-list{display:flex;flex-direction:column;gap:var(--sp-2);max-height:55vh;overflow:auto;scrollbar-width:none}
+.as-list::-webkit-scrollbar{display:none}
+.as-list button{display:flex;align-items:center;gap:var(--sp-3);padding:8px 14px 8px 10px;border-radius:var(--r-m);background:var(--surface);border:1px solid var(--border);text-align:left;font-weight:500;min-height:50px}
+.as-list button .pav{position:relative;width:32px;height:32px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:var(--fs-s);font-weight:600;color:var(--on-color);overflow:hidden}
+.as-list button .pav img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.as-list button .pav.nobody{background:var(--muted);color:var(--hint)}
+.as-list button .nm{flex:1;min-width:0}
+.as-list button .nm span{display:block;font-size:var(--fs-s);color:var(--hint);font-weight:400}
+.as-list button .ck{margin-left:auto;color:var(--link);opacity:0}
+.as-list button.on{border-color:var(--link)}
+.as-list button.on .ck{opacity:1}
+.as-sec{margin:10px 2px 2px;font-size:var(--fs-xs);font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.04em}
+.as-sec span{display:block;text-transform:none;letter-spacing:0;font-weight:400;font-size:var(--fs-s);margin-top:2px}
+.as-note{font-size:var(--fs-s);color:var(--hint);margin:0;line-height:1.35}
+.seg button .n{font-size:var(--fs-xs);margin-left:4px;opacity:.6}
+
+/* Task cards */
+.swipe{position:relative;overflow:hidden;border-top:1px solid var(--border)}
+.swipe:first-child{border-top:0}
+.swipe.lift{z-index:10;box-shadow:var(--sh-2);border-radius:var(--r-m);border-top-color:transparent}
+#taskList:has(.lift){overflow:visible}
+.task{display:flex;gap:var(--sp-3);padding:var(--pad);width:100%;text-align:left;background:var(--fill);position:relative;z-index:1;touch-action:pan-y;transition:transform .42s cubic-bezier(.3,1.32,.55,1),background .15s}
+.swipe.dragging .task{transition:none}
+/* bones of a loading task (see boneUp) */
+@property --sweep{syntax:"<length>";inherits:true;initial-value:-1000px}
+.ghost *,.ghost{color:transparent!important;text-decoration-color:transparent!important;caret-color:transparent}
+.ghost :is(img,svg,video,.shot,.mini,.check,.bdg,.knob,.plus,.ring-wrap,#ring,.av,.fic,.ava,.pill,.thumb,.pav,.bar,.due,.cnt,.ppl-grp i){visibility:hidden}
+.ghost [data-boned]{visibility:hidden}
+.ghost .bones *{visibility:visible}
+.bones{position:absolute;left:0;top:0;width:100%;z-index:20;pointer-events:none;--sweep:calc(var(--W) * -1);animation:bone-sweep 2.2s cubic-bezier(.4,0,.6,1) infinite}
+.bones.block,.bones i{pointer-events:auto}
+.bones.out,.bones.out i{pointer-events:none;opacity:0;transition:opacity .22s ease}
+.bones i{position:absolute;display:block;background-color:rgb(128 128 128 / .2);
+  background-image:linear-gradient(110deg,transparent 38%,rgb(255 255 255 / .16) 47%,rgb(255 255 255 / .24) 50%,rgb(255 255 255 / .16) 53%,transparent 62%);
+  background-size:var(--W) var(--H);background-repeat:no-repeat;
+  background-position:calc(var(--sweep) - var(--x)) calc(0px - var(--y))}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .bones i{background-color:rgb(128 128 128 / .24);background-image:linear-gradient(110deg,transparent 38%,rgb(255 255 255 / .07) 47%,rgb(255 255 255 / .1) 50%,rgb(255 255 255 / .07) 53%,transparent 62%)} }
+:root[data-theme="dark"] .bones i{background-color:rgb(128 128 128 / .24);background-image:linear-gradient(110deg,transparent 38%,rgb(255 255 255 / .07) 47%,rgb(255 255 255 / .1) 50%,rgb(255 255 255 / .07) 53%,transparent 62%)}
+@keyframes bone-sweep{0%{--sweep:calc(var(--W) * -1)}75%,100%{--sweep:var(--W)}}
+@media (prefers-reduced-motion:reduce){ .bones{animation:none} .bones i{background-image:none} }
+#s-task.revealing > :not(.bones),.revealing:not(.screen){animation:bone-in .22s ease}
+@keyframes bone-in{from{opacity:.0}to{opacity:1}}
+#taskList .task,#items .item{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.item.lift{z-index:10;box-shadow:var(--sh-2);border-radius:var(--r-m);border-top-color:transparent}
+#items:has(.lift){overflow:visible}
+#items:has(.lift) :is(.idone,.iacts){visibility:hidden}
+.acts{position:absolute;inset:0;display:flex;visibility:hidden}
+.acts.r{justify-content:flex-end}
+.swipe.side-r .acts.r{visibility:visible}
+.acts button{width:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-1);font-size:var(--fs-xs);font-weight:500;color:var(--on-color)}
+/* dragged past the end the row stretches a little further: the outer button's colour carries on, no gap shows */
+.acts.r button:first-child,.iacts .act-del{position:relative}
+.acts.r button:first-child::before{content:"";position:absolute;top:0;bottom:0;right:100%;width:120px;background:inherit}
+.iacts .act-del::after{content:"";position:absolute;top:0;bottom:0;left:100%;width:120px;background:inherit}
+.act-src{background:var(--c-gray)}.act-comm{background:var(--k-comm)}
+/* the task's description: a block above the items; links in it open in a window of their own; tap — edit */
+.descr-box{border:1px solid var(--border);border-radius:var(--r-l);background:var(--surface);box-shadow:var(--shadow);overflow:hidden}
+.descr-box[hidden]{display:none}
+.descr{position:relative;padding:var(--sp-3) var(--pad);background:var(--surface);touch-action:pan-y;transition:transform .42s cubic-bezier(.3,1.32,.55,1)}
+.descr.swiping{transition:none}
+.descr .iacts{top:0}
+.descr .tx{font-size:var(--fs-base);line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.descr.clamp .tx{display:-webkit-box;-webkit-line-clamp:8;-webkit-box-orient:vertical;overflow:hidden}
+.descr .more{margin-top:var(--sp-1);color:var(--link);font-size:var(--fs-s)}
+.descr a.ln{color:var(--link);text-decoration:none;border-bottom:1px solid color-mix(in srgb, var(--link) 35%, transparent);word-break:break-all}
+.sheet .btns3 button[hidden],.sheet .btns button[hidden]{display:none}
+/* grows with the text, but stays a third of the screen: with the keyboard up the buttons are still seen */
+#descrInp,#commEditInp{max-height:33dvh;overflow-y:auto}
+/* questions and comments right on the task screen: open questions first, tinted; then the rest in order; the field under them */
+.talk-list{display:flex;flex-direction:column;gap:var(--sp-2)}
+.talk-list:empty{display:none}
+.talk-hint{font-size:var(--fs-s);color:var(--hint);text-align:center;padding:var(--sp-1) 0}
+.talk-tabs{margin:var(--gap-sec) 0 var(--gap-in)}   /* tabs under the task head a section, like .sec-label */
+.seg.even button{flex:1;padding-inline:var(--sp-2)}
+.talk[hidden],.hist[hidden]{display:none}
+.talk .empty{padding:var(--sp-4) var(--sp-2)}
+.talk-list .src-msg{background:var(--surface)}
+.src-msg.comm.q{background:color-mix(in srgb, var(--k-ask) 8%, var(--surface));border-color:color-mix(in srgb, var(--k-ask) 40%, var(--border))}
+.src-msg .who .bdg{align-self:center}
+.src-msg .qby{margin-top:var(--sp-1);font-size:var(--fs-s);color:var(--hint)}
+.src-msg.flash{animation:flash 1.8s ease-out}
+.composer{margin-top:var(--sp-2);padding:var(--sp-1);border:1px solid var(--border);border-radius:var(--r-l);background:var(--surface);transition:border-color .2s}
+.composer.ask{border-color:var(--k-ask)}
+.composer-line{display:flex;align-items:flex-end;gap:var(--sp-1)}
+.composer-line textarea{flex:1;min-width:0;align-self:center}
+.composer .att-row{padding-bottom:var(--sp-2)}
+.composer textarea{display:block;width:100%;min-height:calc(1.4em + var(--sp-2) * 2);border:0;background:transparent;padding:var(--sp-2);caret-color:var(--link);font-size:var(--fs-input);line-height:1.4;resize:none;outline:none;color:var(--text);font-family:inherit;scrollbar-width:none}
+.composer-bar{display:flex;align-items:center;gap:var(--sp-2);margin-top:var(--sp-2)}
+.sheet .composer-bar{margin:0}
+.ask-tg{display:inline-flex;align-items:center;gap:var(--sp-2);min-height:var(--btn-h);padding:0 var(--sp-2);color:var(--hint);font-size:var(--fs-m);font-weight:500}
+.ask-tg.on{color:var(--k-ask)}
+.ask-tg .sw{flex:none;width:38px;height:24px;border-radius:var(--r-full);background:var(--border);position:relative;transition:background .2s}
+.ask-tg .sw::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:var(--on-color);box-shadow:var(--sh-1);transition:transform .22s cubic-bezier(.32,.72,0,1)}
+.ask-tg.on .sw{background:var(--k-ask)}
+.ask-tg.on .sw::after{transform:translateX(14px)}
+/* screenshots and videos: thumbnails in the field while they upload (× removes), a grid in the message */
+.att-btn{display:grid;place-items:center;width:var(--btn-h);height:var(--btn-h);border-radius:var(--r-m);color:var(--hint)}
+.att-btn:active{background:var(--muted)}
+.att-row{display:flex;gap:var(--sp-2);overflow-x:auto;scrollbar-width:none;padding:var(--sp-1) var(--sp-1) 0}
+.att-row:empty{display:none}
+.sheet .att-row{margin:0;padding-inline:0}
+.att{position:relative;flex:none;width:64px;height:64px;border-radius:var(--r-s);overflow:hidden;background:var(--muted)}
+.att img,.att video{width:100%;height:100%;object-fit:cover;display:block}
+.att .p{position:absolute;inset:0;display:grid;place-items:center;background:var(--scrim);color:var(--on-color);font-size:var(--fs-xs);font-weight:500}
+.att.err .p{background:color-mix(in srgb, var(--red) 70%, transparent)}
+.att .x{position:absolute;top:2px;right:2px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--glass);color:var(--on-color)}
+.att .vi{position:absolute;left:4px;bottom:4px;color:var(--on-color);line-height:0;filter:drop-shadow(0 0 2px rgba(0,0,0,.5))}
+.c-media{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-top:var(--sp-2)}
+.c-media>*{position:relative;display:block;flex:none;width:calc(var(--ic-xl) * 1.5);height:calc(var(--ic-xl) * 1.5);border-radius:var(--r-s);background:var(--muted);overflow:hidden;border:1px solid var(--border)}
+.c-media img,.c-media video{width:100%;height:100%;object-fit:cover;display:block}
+.c-media .c-vid .vi{position:absolute;inset:0;display:grid;place-items:center;color:var(--on-color);background:rgb(0 0 0 / .25)}
+.c-media .c-vid .vi svg{width:var(--ic-l);height:var(--ic-l)}
+.c-media>:active{transform:scale(.96)}
+/* buttons inside the field: concentric with its corner — its radius minus the border and the gap, so the gap is an even strip */
+.composer{--in-r:calc(var(--r-l) - 1px - var(--sp-1))}
+.composer .send,.composer .att-btn{border-radius:var(--in-r)}
+.composer .send{flex:none;display:grid;place-items:center;width:var(--btn-h);height:var(--btn-h);background:var(--accent);color:var(--accent-text);font-weight:500;font-size:var(--fs-m)}
+.composer .send:disabled{opacity:.5}
+.composer .send:active{transform:scale(.95)}
+.composer.ask .send{background:var(--k-ask);color:var(--on-color)}
+/* an item's comments: a small grey counter under its text */
+.icomm{display:inline-flex;align-items:center;gap:var(--sp-1);margin-top:var(--sp-1);color:var(--hint);font-size:var(--fs-s)}
+.icomm svg{width:var(--ic-s);height:var(--ic-s)}
+.txt .icomm{display:flex}
+.src-msg .about{margin-top:var(--sp-1);font-size:var(--fs-s);color:var(--hint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cfeed{max-height:none;overflow:visible}
+.cfeed .src-msg{text-align:left;width:100%}
+.cfeed .src-msg:active{transform:scale(.98)}
+/* swipe a task row to the right: «Закрыть» comes out from the left, past CLOSE_AT it arms and closes on release */
+.tdone{position:absolute;right:100%;top:0;bottom:0;width:200px;display:flex;align-items:center;justify-content:flex-end;padding-right:var(--sp-4);color:var(--on-color);background:var(--green);font-size:var(--fs-xs);font-weight:500}
+.tdone .in{display:flex;flex-direction:column;align-items:center;gap:var(--sp-1)}
+.tdone svg{transform:scale(.6);opacity:.6;transition:transform .2s cubic-bezier(.3,1.5,.5,1),opacity .2s}
+.swipe.armed .tdone svg{transform:scale(1.15);opacity:1}.act-ren{background:var(--c-blue)}.act-blg{background:var(--c-violet)}.act-st{background:var(--c-violet)}.act-del{background:var(--red)}
+/* sheets fade in and out (visibility instead of display, so closing can animate too) */
+/* Pop-ups come up from the bottom over a blurred screen; --kb lifts them above the on-screen keyboard */
+.sheet{position:absolute;inset:0;z-index:60;background:var(--scrim);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  display:flex;align-items:flex-end;padding-bottom:var(--kb,0px);
+  opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility 0s linear .22s,padding-bottom .25s cubic-bezier(.32,.72,0,1)}
+.sheet.open{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .22s ease,padding-bottom .25s cubic-bezier(.32,.72,0,1)}
+/* one flex column + gap for every popup: no per-field margins inside .card */
+.sheet .card{display:flex;flex-direction:column;gap:var(--sheet-gap);width:calc(100% - 20px);margin:10px;margin-bottom:calc(10px + env(safe-area-inset-bottom));background:var(--bg);border:1px solid var(--border);border-radius:var(--r-xl);padding:var(--sheet-pad);
+  box-shadow:var(--sh-3);scrollbar-width:none;max-height:calc(100% - 20px);overflow-y:auto;
+  opacity:0;transform:translateY(28px) scale(.98);transition:transform .32s cubic-bezier(.32,.72,0,1),opacity .22s ease}
+.sheet.open .card{opacity:1;transform:none}
+/* field + its own hint (tighter than --sheet-gap) */
+.sheet-stack{display:flex;flex-direction:column;gap:var(--sheet-hint);min-width:0}
+.sheet-hint,.sheet .new-note,.sheet .as-note,.sheet .rem-note,.sheet .acc-note,.sheet .src-note{font-size:var(--fs-s);color:var(--hint);line-height:1.35;margin:0}
+.sheet-hint:empty,.sheet .new-note:empty,.sheet .rem-note:empty,.sheet #picNote:empty{display:none}   /* no flex gap for a blank hint */
+.sheet .src-note[hidden],.sheet-hint[hidden]{display:none}
+.sheet .btns3{display:flex;gap:var(--sp-2);margin:calc(var(--sheet-foot) - var(--sheet-gap)) 0 0}
+.sheet .btns3 button{display:grid;place-items:center;padding:12px 14px;border-radius:var(--r-m);background:var(--muted);font-weight:500}
+.sheet .btns3 .primary{background:var(--accent);color:var(--accent-text)}
+.sheet .btns3 button{flex:1}
+.sheet .btns3 .danger{color:var(--red);flex:none;padding-inline:var(--sp-4)}
+.shotpick{display:flex;gap:var(--sp-2);overflow-x:auto;margin:0;padding-bottom:2px}
+.shotpick::-webkit-scrollbar{display:none}
+.chip{flex:none;height:56px;padding:0 12px;border-radius:var(--r-m);border:1.5px solid var(--border);background:var(--surface);font-size:var(--fs-s);color:var(--hint);position:relative;overflow:hidden}
+.chip.on{border-color:var(--link);color:var(--text)}
+.shot-chip{width:44px;padding:0}
+.shot-chip.on{box-shadow:0 0 0 2px var(--link) inset}
+button.add-row{width:100%;text-align:left;color:var(--hint)}
+.shot.add-shot{border:1.5px dashed var(--dash);background:transparent;color:var(--hint);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:var(--fs-s)}
+.shot.add-shot .plus-big{display:block;line-height:0}
+.shot.sk{border:0}
+.chip[data-k="0"],.chip.add-chip{display:grid;place-items:center;width:56px;padding:0}
+.chip.add-chip{border-style:dashed;border-color:var(--dash);color:var(--link)}
+@keyframes up{from{transform:translateY(100%)}}
+.sheet .h{font-weight:600;font-size:var(--fs-l);margin:0 0 calc(var(--sheet-head) - var(--sheet-gap))}
+/* «Исходное сообщение»: what the task was made from, as written in the chat */
+.src-list{position:relative;display:flex;flex-direction:column;gap:var(--sp-2);max-height:60vh;overflow:auto;scrollbar-width:none}
+.src-list::-webkit-scrollbar{display:none}
+.src-msg{padding:var(--sp-3) var(--pad);border-radius:var(--r-m);background:var(--surface);border:1px solid var(--border)}
+.src-msg .who{display:flex;gap:var(--sp-2);align-items:baseline;font-size:var(--fs-s);color:var(--hint)}
+.src-msg .who b{color:var(--text);font-weight:600}
+.src-msg .kind{margin-top:var(--sp-1);font-size:var(--fs-s);color:var(--hint)}
+.src-msg .tx{margin-top:var(--sp-1);font-size:var(--fs-base);line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+/* a comment: the author's avatar on the left, name · date and the text next to it */
+.src-msg.comm{display:flex;gap:var(--sp-3);align-items:flex-start}
+.src-msg.comm .pav-s{width:calc(var(--ic-l) + var(--sp-2));height:calc(var(--ic-l) + var(--sp-2));font-size:var(--fs-s)}
+.src-msg.comm .body{flex:1;min-width:0}
+.src-msg.comm .who{align-items:center;min-width:0}
+.src-msg.comm .who b{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.src-msg.comm .who>span{flex:none;white-space:nowrap}
+/* the shutter: own messages swipe left — «Изменить» · «Удалить»; the frame clips the actions */
+.shut{border-radius:var(--r-m);overflow:hidden}
+.shut>.src-msg{position:relative;touch-action:pan-y;transition:transform .42s cubic-bezier(.3,1.32,.55,1)}
+.shut>.src-msg.swiping{transition:none}
+.shut .iacts{top:-1px;bottom:-1px;left:calc(100% + 1px)}
+/* swipe a question right: «Решён» (green; on an answered one «Открыть», grey) comes out from the left */
+.qdone{position:absolute;right:calc(100% + 1px);top:-1px;bottom:-1px;width:160px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:var(--sp-1);padding-right:var(--sp-4);color:var(--on-color);background:var(--green);font-size:var(--fs-xs);font-weight:500}
+.src-msg:not(.q) .qdone{background:var(--c-gray)}
+.qdone svg{transform:scale(.6);opacity:.6;transition:transform .2s cubic-bezier(.3,1.5,.5,1),opacity .2s}
+.src-msg.armed .qdone svg{transform:scale(1.15);opacity:1}
+.src-msg.comm .del{display:grid;place-items:center;width:28px;height:28px;margin:calc(var(--sp-1) * -1) calc(var(--sp-2) * -1) calc(var(--sp-1) * -1) auto;border-radius:var(--r-s);flex:none}
+.src-msg.comm .del:active{background:var(--muted)}
+.src-msg .del{margin-left:auto;color:var(--hint);font-size:var(--fs-s)}
+.src-msg .del:active{opacity:.5}
+.src-list:empty{display:none}
+:root.kb .sheet .src-list{max-height:28vh}   /* the keyboard is up: the list gives way to the field under it */
+.src-note{margin:0;font-size:var(--fs-s);color:var(--hint);line-height:1.35}
+.src-note[hidden]{display:none}
+.src-note.descr-note{margin:0}
+.src-msg .shots{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-top:var(--sp-2)}
+.src-msg .shots img{width:calc(50% - var(--sp-1));aspect-ratio:4/3;object-fit:cover;border-radius:var(--r-s);background:var(--muted)}
+.sheet textarea{width:100%;border:1px solid var(--border);background:var(--surface);border-radius:var(--r-m);padding:10px 12px;font-size:var(--fs-input);line-height:1.4;resize:none;outline:none}
+.sheet textarea:focus{border-color:var(--link)}
+.sheet textarea{scrollbar-width:none}
+.sheet .fld{display:block;width:100%;border:1px solid var(--border);background:var(--surface);border-radius:var(--r-m);padding:10px 12px;font-size:var(--fs-input);color:var(--text);outline:none}
+.sheet .fld:focus{border-color:var(--link)}
+.sheet textarea.fld{resize:none;font-family:inherit;line-height:1.35}
+/* the result of a closed task under its badges: a link and the hours */
+/* the result of a closed task: the «Результат» tag opens it — what was done, the link, the hours */
+.res-body{display:flex;flex-direction:column;gap:var(--sp-3);margin:0}
+.sheet .res-body{margin:0}
+.res-body .tx{font-size:var(--fs-base);line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.res-body .res-ln{display:flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-m);color:var(--link);min-width:0}
+.res-body .res-ln span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.res-body .res-ln svg{flex:none;width:var(--ic-m);height:var(--ic-m)}
+.res-body .res-h{font-size:var(--fs-s);color:var(--hint)}
+.sheet textarea::-webkit-scrollbar,.sheet .card::-webkit-scrollbar{display:none}
+.sheet .btns{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin:calc(var(--sheet-foot) - var(--sheet-gap)) 0 0}
+.sheet .btns button{display:grid;place-items:center;padding:12px;border-radius:var(--r-m);background:var(--muted);font-weight:500}
+.sheet .btns .primary{background:var(--accent);color:var(--accent-text)}
+.task:active{background:var(--muted)}
+.thumb{width:54px;height:54px;border-radius:var(--r-s);flex:none;border:1px solid var(--border);overflow:hidden;position:relative}
+.task .main{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}   /* without a progress bar the text sits in the middle of the row */
+.task .t{font-weight:500;line-height:1.3}
+.task .meta{font-size:var(--fs-s);color:var(--hint);margin-top:8px;display:flex;gap:6px;align-items:center}
+.bar{height:4px;border-radius:4px;background:var(--muted);overflow:hidden;margin-top:9px;flex:1}
+.bar i{display:block;height:100%;background:var(--text);border-radius:4px;transition:width .5s cubic-bezier(.32,.72,0,1)}
+.bar.done i{background:var(--green)}
+.prog{display:flex;align-items:center;gap:var(--sp-2)}
+.prog .mono{font-size:var(--fs-xs);color:var(--hint);margin-top:9px}
+/* the bot is not an admin of the chat: it gets no messages or reactions */
+.warn-s{color:var(--amber)}
+.warn-card{display:flex;gap:var(--sp-3);align-items:flex-start;margin:0 0 var(--gap-block);padding:var(--pad);border:1px solid color-mix(in srgb, var(--amber) 45%, var(--border));border-radius:var(--r-l);background:color-mix(in srgb, var(--amber) 8%, var(--surface))}
+.warn-card[hidden]{display:none}
+.warn-card .ic{flex:none;color:var(--amber);margin-top:1px}
+.warn-card .tx{display:flex;flex-direction:column;gap:3px;min-width:0}
+.warn-card .tx b{font-weight:600;font-size:var(--fs-m)}
+.warn-card .tx span{font-size:var(--fs-s);color:var(--hint);line-height:1.4}
+/* projects screen bottom: «turn notifications on» card, settings and «what's new» */
+.ask-card{display:flex;gap:var(--sp-3);align-items:flex-start;margin-top:var(--gap-block);padding:var(--pad);border:1px solid var(--border);border-radius:var(--r-l);background:var(--surface)}
+.ask-card[hidden]{display:none}
+.ask-card .ic{flex:none;width:34px;height:34px;border-radius:var(--r-s);display:grid;place-items:center;background:var(--muted);color:var(--link)}
+.ask-card .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.ask-card .tx b{font-weight:600;font-size:var(--fs-m)}
+.ask-card .tx span{font-size:var(--fs-s);color:var(--hint);line-height:1.35}
+.ask-card .ask-acts{flex:none;margin:-4px -6px 0 0}
+.ask-card .on-btn{align-self:flex-start;margin-top:8px;padding:7px 12px;border-radius:var(--r-s);background:var(--accent);color:var(--accent-text);font-size:var(--fs-s);font-weight:500}
+.ask-card .x{width:30px;height:30px;display:grid;place-items:center;color:var(--hint);margin-right:-4px}
+.foot-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap-in);margin-top:var(--gap-block)}
+/* actions stacked under each other: one group, the small gap */
+:is(.link-row,.foot-grid,.ask-card) + :is(.link-row,.foot-grid,.ask-card){margin-top:var(--gap-in)}
+.foot-grid .tile{display:flex;align-items:center;gap:var(--sp-2);padding:0 var(--sp-1) 0 var(--sp-3);min-height:var(--act-h);   /* icon and label in line with .link-row; the right side gives room to the label */border:1px solid var(--act-line);border-radius:var(--r-m);background:var(--surface);color:var(--link);font-size:var(--fs-s);text-align:left;min-width:0;transition:transform .15s}
+.foot-grid .tile:active{transform:scale(.96)}
+.foot-grid .tile svg{flex:none}
+.foot-grid .tile span:first-of-type{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.foot-grid .tile .news-dot{margin-left:auto;margin-right:var(--sp-2)}
+.link-row .chev{margin-left:auto;color:var(--hint);flex:none}
+.link-row[hidden]{display:none}
+.foot-grid .tile[hidden]{display:none}
+/* the task's own actions under it: the same tiles, two in a row; a long name ends in «…» */
+.task-acts{margin-top:var(--gap-block)}
+.task-acts .tile.ok{color:var(--green);border-color:color-mix(in srgb, var(--green) 30%, transparent)}
+.news-dot{width:8px;height:8px;border-radius:50%;background:var(--red);flex:none}
+.news-dot[hidden]{display:none}
+/* settings */
+.set-row{display:flex;align-items:center;gap:var(--sp-4);width:100%;padding:var(--pad);border-radius:var(--r-m);background:var(--surface);border:1px solid var(--border);text-align:left}
+.set-row+.set-row{margin-top:var(--gap-in)}
+.set-row[hidden]{display:none}
+.set-row .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.set-row .tx b{font-weight:500;font-size:var(--fs-base)}
+.set-row .tx span{font-size:var(--fs-s);color:var(--hint);line-height:1.35}
+.set-row .sw{flex:none;width:46px;height:28px;border-radius:var(--r-full);background:var(--border);position:relative;transition:background .2s}
+.set-row .sw::after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:var(--on-color);box-shadow:var(--sh-1);transition:transform .22s cubic-bezier(.32,.72,0,1)}
+.set-row .sw.on{background:var(--green)}
+.set-row .sw.on::after{transform:translateX(18px)}
+.set-row.busy{opacity:.6;pointer-events:none}
+/* which notifications: one switch per kind, under the main one while it is on */
+.notify-kinds{margin-top:var(--gap-in)}
+.notify-kinds[hidden]{display:none}
+.set-row .plus{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--muted);color:var(--link)}
+.set-row.done .plus{color:var(--green)}
+/* what's new */
+.news{padding:0 2px}
+.news .day{border:1px solid var(--border);border-radius:var(--r-l);padding:14px;background:var(--surface)}
+.news .day+.day{margin-top:10px}
+/* theme choice: a segmented control */
+.theme-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;border-radius:var(--r-m);background:var(--muted)}
+.theme-pick button{padding:9px 6px;border-radius:var(--r-s);font-size:var(--fs-m);font-weight:500;color:var(--hint);transition:background .2s,color .2s}
+.theme-pick button.on{background:var(--bg);color:var(--text);box-shadow:var(--sh-1)}
+.set-note{font-size:var(--fs-s);color:var(--hint);margin:var(--gap-in) 2px 0}
+.news .d{display:flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-s);color:var(--hint);margin-bottom:8px}
+.news .d .new{font-size:var(--fs-xs);font-weight:600;color:var(--on-color);background:var(--red);border-radius:var(--r-s);padding:1px 6px}
+.news ul{list-style:none;display:flex;flex-direction:column;gap:var(--sp-2)}
+.news li{display:flex;gap:var(--sp-3);font-size:var(--fs-m);line-height:1.4}
+.news li::before{content:"";flex:none;width:5px;height:5px;border-radius:50%;background:var(--link);margin-top:.55em}
+.news li b{font-weight:600}
+.empty{padding:40px 20px;text-align:center;color:var(--hint);font-size:var(--fs-m)}
+
+/* Task screen */
+.strip{display:flex;gap:var(--sp-2);overflow-x:auto;margin:0 -16px 16px;padding:0 16px 2px;scroll-snap-type:x mandatory;scroll-padding:0 16px}
+.strip::-webkit-scrollbar{display:none}
+.shot{flex:none;width:96px;height:128px;border-radius:var(--r-m);border:1px solid var(--border);position:relative;overflow:hidden;scroll-snap-align:start;transition:transform .15s}
+.shot:active{transform:scale(.97)}
+.shot img{border-radius:inherit}   /* the viewer reads the corner radius off the picture itself and rounds the photo as it folds back */
+.shot .num{position:absolute;left:6px;top:6px;font-size:var(--fs-xs);background:rgba(9,9,11,.72);color:var(--on-color);border-radius:var(--r-s);padding:1px 6px;backdrop-filter:blur(6px)}
+.shot.video::after{content:"";position:absolute;inset:0;margin:auto;width:34px;height:34px;border-radius:50%;background:rgba(9,9,11,.6) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E") center/16px no-repeat}
+
+.head-card{display:flex;gap:var(--sp-4);align-items:center;margin-bottom:16px}
+.ring{flex:none;position:relative;width:64px;height:64px}
+.ring svg{transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:7;stroke-linecap:round}
+.ring .track{stroke:var(--muted)}
+.ring .val{stroke:var(--text);transition:stroke-dashoffset .7s cubic-bezier(.32,.72,0,1),stroke .3s}
+.ring.full .val{stroke:var(--green)}
+.ring .lbl{position:absolute;inset:0;display:grid;place-items:center;font-size:var(--fs-s);font-weight:600}
+.title-edit{flex:1;min-width:0}
+.title-edit textarea{width:100%;border:0;background:transparent;resize:none;font-size:var(--fs-xl);font-weight:600;letter-spacing:-.025em;line-height:1.15;outline:none;border-radius:var(--r-s);padding:2px 4px;margin-left:-4px;overflow:hidden}
+.title-edit textarea:focus{background:var(--muted)}
+/* author · date and the status badge: when they do not fit on one line the badge drops below with a gap */
+.title-edit .meta{font-size:var(--fs-s);color:var(--hint);margin-top:4px}
+/* the task's project: a small grey caption above its title, a tap opens the project */
+.proj-cap{display:block;max-width:100%;border:0;background:none;padding:0;margin:0 0 var(--sp-1);font:inherit;font-size:var(--fs-s);color:var(--hint);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.proj-cap[hidden]{display:none}
+.proj-cap:active{opacity:.6}
+.title-edit .meta .bdgs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+
+/* «Картинка проекта»: the avatar as it will be in the list, bigger */
+.pic-prev{display:flex;justify-content:center;margin:var(--sp-2) 0 var(--sp-1)}
+.pic-prev .ava{width:calc(var(--ic-xl) + var(--sp-6));height:calc(var(--ic-xl) + var(--sp-6));font-size:var(--fs-xl)}
+.pic-prev .ava.busy{opacity:.5}
+/* the picture's drop zone: tap opens the picker; a file dragged in, a picture or its link pasted, or a link typed below */
+.pic-drop{border:1px dashed var(--border);border-radius:var(--r-l);padding:var(--sp-3) var(--sp-3) var(--sp-2);margin:0;transition:background .15s,border-color .15s;cursor:pointer;-webkit-user-select:none;user-select:none}
+.pic-drop:active{background:var(--muted)}
+.pic-drop.over{background:var(--muted);border-color:var(--link)}
+.pic-drop .pic-prev{margin-top:0;pointer-events:none}
+.pic-hint{text-align:center;font-size:var(--fs-s);color:var(--hint);pointer-events:none}
+.pic-url{display:flex;gap:var(--sp-2);margin:0}
+.pic-url .fld{flex:1;min-width:0}
+.pic-url button{flex:none;width:var(--btn-h);border-radius:var(--r-m);background:var(--muted);color:var(--text);display:grid;place-items:center}
+.pic-url button:disabled{opacity:.4}
+.sheet .btns3 .primary:disabled{opacity:.5}
+/* inside a sheet the section label uses the sheet gap, not the screen's --gap-sec */
+.sheet .card > .sec-label{margin:0}
+/* «Время»: a row with the share of the hours as a thin bar under its name */
+.tbar{height:var(--sp-1);border-radius:var(--r-full);background:var(--muted);margin-top:var(--sp-2);overflow:hidden}
+.tbar i{display:block;height:100%;border-radius:inherit;background:var(--bc,var(--k-time));transition:width .4s cubic-bezier(.2,.8,.2,1)}
+.row .hrs{flex:none;font-weight:600;font-variant-numeric:tabular-nums}
+.sec-label{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-3);margin:var(--gap-sec) 2px var(--gap-in)}
+/* a label that opens the content right under the filters or the stats: the block gap, not the section one */
+:is(.feed-bar,.stats,.ppl-picks,.seg-wrap,.search-box) + * > .sec-label:first-child,:is(.feed-bar,.stats,.ppl-picks,.seg-wrap) + .sec-label{margin-top:var(--gap-block)}
+.sec-label[hidden]{display:none}
+.sec-label .mono{font-size:var(--fs-xs);color:var(--hint);text-transform:uppercase;letter-spacing:.05em}
+.sec-label button{display:grid;place-items:center;width:32px;height:32px;margin:-7px -6px;border-radius:var(--r-s);color:var(--link)}
+.sec-label button:active{background:var(--muted)}
+
+/* Checklist items */
+.items{border:1px solid var(--border);border-radius:var(--r-l);background:var(--surface);overflow:hidden;box-shadow:var(--shadow)}
+.item{display:flex;align-items:flex-start;gap:var(--sp-3);padding:12px 12px 12px 10px;border-top:1px solid var(--border);background:var(--surface);position:relative;touch-action:pan-y;transition:background .2s,transform .42s cubic-bezier(.3,1.32,.55,1)}
+.item.swiping{transition:none}
+/* swipe left: the row slides and pulls these in from behind the right edge (.items clips them) */
+/* swipe to the right: «done» (or «not done» for a ticked item) comes out from the left */
+.idone{position:absolute;right:100%;top:-1px;bottom:0;width:160px;display:flex;align-items:center;justify-content:flex-end;padding-right:22px;color:var(--on-color);background:var(--green)}
+.item.done .idone{background:var(--c-gray)}
+.item.done .idone .i-do,.item:not(.done) .idone .i-undo{display:none}
+.idone svg{transform:scale(.6);opacity:.6;transition:transform .2s cubic-bezier(.3,1.5,.5,1),opacity .2s}
+.item.armed .idone svg{transform:scale(1.15);opacity:1}
+.iacts{position:absolute;left:100%;top:-1px;bottom:0;display:flex}
+.iacts button{width:56px;display:grid;place-items:center;color:var(--on-color)}
+.item:first-child{border-top:0}
+.item.dragging{z-index:10;box-shadow:var(--sh-2);border-radius:var(--r-m);transition:none}
+.check{flex:none;width:22px;height:22px;border-radius:var(--r-s);border:1.5px solid var(--hint);margin-top:1px;display:grid;place-items:center;transition:all .25s cubic-bezier(.32,.72,0,1)}
+.check svg{width:14px;height:14px;stroke:var(--on-color);stroke-width:3;fill:none}
+.check svg path{stroke-dasharray:26;stroke-dashoffset:26;transition:stroke-dashoffset .3s .05s}
+.item.done .check{background:var(--green);border-color:var(--green);transform:scale(1.04)}
+.item.done .check svg path{stroke-dashoffset:0}
+.item .txt{flex:1;min-width:0;line-height:1.4;padding-top:1px;outline:none;border-radius:var(--r-s);word-break:break-word}
+/* the item number sits inside the empty box, small and faint, and gives way to the tick */
+.check>*{grid-area:1/1}
+.item.done .txt{color:var(--hint)}
+.item .txt .body{background:linear-gradient(currentColor,currentColor) 0 60%/0 1.5px no-repeat;-webkit-box-decoration-break:clone;box-decoration-break:clone;transition:background-size .38s cubic-bezier(.32,.72,0,1),color .25s}
+.item.done .txt .body{background-size:100% 1.5px}
+.item a.ln,.src-msg a.ln{color:var(--link);text-decoration:none;border-bottom:1px solid color-mix(in srgb, var(--link) 35%, transparent);word-break:break-all}
+.item.done a.ln{color:var(--hint)}
+.item .mini{flex:none;width:30px;height:40px;border-radius:var(--r-s);border:1px solid var(--border);overflow:hidden;position:relative}
+.item .del{display:none;flex:none;color:var(--red);padding:2px}
+.item .src{flex:none;width:30px;height:30px;margin:-4px -4px 0 0;border-radius:var(--r-s);display:grid;place-items:center;color:var(--link);transition:background .15s}
+.item .src:active{background:var(--muted)}
+.add-row{display:flex;gap:var(--sp-3);align-items:center;padding:12px;border-top:1px solid var(--border)}
+.add-row .plus{width:22px;height:22px;display:grid;place-items:center;color:var(--hint);flex:none}
+.add-row input{flex:1;border:0;background:transparent;outline:none}
+.add-row input::placeholder{color:var(--hint)}
+#taskList,#projList{background:var(--fill)}
+/* on the grey of the lists: badges and progress tracks one step off it, pressed rows a shade darker */
+#projList .pill,#taskList .bar{background:var(--on-fill)}
+#projList .row:active,#taskList .task:active{background:color-mix(in srgb, var(--fill), var(--text) 7%)}   /* lists of projects and tasks: filled; everything else outlined */
+#taskList .add-row{padding:14px}
+#taskList .add-row .plus{width:54px;height:54px;border-radius:var(--r-s);border:1.5px dashed var(--dash);color:var(--link);background:var(--sunk)}
+#taskList .add-row .add-l{color:var(--link);font-weight:500}
+#taskList > .add-row:first-child{border-top:0}
+#newDescr{min-height:calc(var(--btn-h) + var(--sp-4))}
+.new-sub{display:flex;flex-direction:column;gap:var(--sheet-hint);min-width:0}
+.new-sub-h{font-size:var(--fs-s);font-weight:500;color:var(--hint);margin:0 0 0 2px}
+.new-ilist{display:flex;flex-direction:column;gap:var(--sheet-hint)}
+.new-irow{display:flex;align-items:flex-start;gap:var(--sp-1)}
+.new-irow .fld{flex:1;min-width:0;min-height:var(--btn-h);padding:10px 12px;resize:none;font-family:inherit;line-height:1.35}
+.new-idel{flex:none;width:var(--btn-h);height:var(--btn-h);display:grid;place-items:center;border-radius:var(--r-m);color:var(--hint);background:transparent}
+.new-idel:active{transform:scale(.94);color:var(--red)}
+.new-idel[hidden]{display:none}
+.new-iadd{display:flex;align-items:center;gap:var(--sp-2);width:100%;margin:0;padding:0 var(--sp-3);height:var(--btn-h);border:1px dashed var(--dash);border-radius:var(--r-m);background:var(--sunk);color:var(--link);font-size:var(--fs-s);font-weight:500;text-align:left}
+.new-iadd:active{transform:scale(.98)}
+.new-iadd svg{flex:none;color:var(--link)}
+.new-who{display:flex;align-items:center;gap:10px;width:100%;margin:0;padding:8px 12px 8px 8px;border-radius:var(--r-m);border:1px solid var(--border);background:var(--surface);text-align:left;min-height:46px}
+.new-who[hidden]{display:none}   /* author display:flex otherwise beats the hidden attribute */
+.new-who .pav-s{width:28px;height:28px;font-size:var(--fs-s)}
+.new-who .pav-s.nobody{background:var(--muted);color:var(--hint)}
+.new-who .wl{flex:1;min-width:0;font-size:var(--fs-s);color:var(--hint);line-height:1.25}
+.new-who .wl b{display:block;font-size:var(--fs-m);font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.new-who .chev{color:var(--hint);flex:none}
+.sheet .btns .primary:disabled{opacity:.5}
+
+/* Each recording can play and expand independently. */
+.voice+.voice{margin-top:var(--gap-in)}
+.voice-head{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--pad)}
+.voice-toggle{display:flex;align-items:center;gap:var(--sp-2);flex:1;min-width:0;min-height:var(--btn-h);text-align:left;color:var(--text)}
+.voice-author{flex:1;min-width:0;font-weight:500;font-size:var(--fs-m);overflow-wrap:anywhere}
+.voice .caret{width:var(--ic-m);height:var(--ic-m);flex:none;color:var(--hint);transition:transform .2s}
+.voice-toggle[aria-expanded="true"] .caret{transform:rotate(180deg)}
+.voice .vplay{flex:none;width:var(--btn-h);height:var(--btn-h);border-radius:var(--r-full);display:grid;place-items:center;background:var(--muted);color:var(--text)}
+.voice .vplay[hidden]{display:none}
+.voice .vplay:active{transform:scale(.94)}
+.voice .vplay.on{background:var(--link);color:var(--on-color)}
+.voice .vplay svg{pointer-events:none;width:var(--ic-m);height:var(--ic-m)}
+.voice .vplay:not(.on) svg:last-child,.voice .vplay.on svg:first-child{display:none}
+.voice .vtime{color:var(--hint);font-size:var(--fs-s);font-variant-numeric:tabular-nums;white-space:nowrap}
+.voice-body{padding:0 var(--pad) var(--pad);color:var(--text);overflow-wrap:anywhere}
+.voice-content{font-size:var(--fs-m);line-height:1.5}
+.voice-body .seg button{border-radius:var(--r-s)}
+.voice-body .seg button.on{background:var(--card);box-shadow:var(--sh-1)}
+.voice-summary{display:grid;gap:var(--gap-block)}
+.voice-summary b{display:block;margin-bottom:var(--sp-1);font-weight:600}
+.voice-summary ul{padding-inline-start:var(--sp-5);list-style:disc}
+.voice-summary li+li{margin-top:var(--sp-1)}
+.voice-loading{display:grid;gap:var(--sp-2);padding-block:var(--sp-2)}
+.voice-loading i{height:var(--fs-s)}
+.voice-loading i:last-child{width:70%}
+/* Files from the chat (tables, PDFs …): tap = download, arrow = the message in the chat */
+.files{border:1px solid var(--border);border-radius:var(--r-l);background:var(--surface);overflow:hidden}
+.files .frow{display:flex;align-items:center;gap:var(--sp-3);padding:10px 14px;min-height:var(--row-h);width:100%;text-align:left;color:var(--text)}
+.files .frow+.frow{border-top:1px solid var(--border)}
+.files .frow:active{background:var(--muted)}
+.files .fic{flex:none;width:34px;height:34px;border-radius:var(--r-s);display:grid;place-items:center;background:var(--muted);color:var(--link)}
+.files .fn{flex:1;min-width:0}
+.files .fn b{display:block;font-weight:500;font-size:var(--fs-m);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.files .fn span{display:block;font-size:var(--fs-s);color:var(--hint);margin-top:1px}
+.files .fdl{flex:none;color:var(--link)}
+.files .fchat{flex:none;width:34px;height:34px;margin-right:-8px;display:grid;place-items:center;color:var(--hint);border-radius:50%}
+.files .fchat:active{background:var(--muted)}
+/* History: who did what and when */
+.hist{border:1px solid var(--border);border-radius:var(--r-l);background:var(--surface);padding:0 14px}
+.hist .ev{display:flex;gap:var(--sp-3);padding:11px 0;border-top:1px solid var(--border);align-items:flex-start}
+.hist .ev:first-child{border-top:0}
+.hist .av{position:relative;width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:var(--fs-s);font-weight:600;color:var(--on-color)}
+.hist .av img{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;object-fit:cover}
+.hist .av .k{position:absolute;right:-3px;bottom:-3px;width:15px;height:15px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--card);color:var(--on-color)}
+.hist .tx{font-size:var(--fs-m);line-height:1.4;min-width:0;overflow-wrap:anywhere}
+.hist .tx b{font-weight:600}
+.hist .tx q{color:var(--hint);quotes:"«" "»"}
+.hist .tm{font-size:var(--fs-xs);color:var(--hint);margin-top:2px}
+.hist .more{display:block;width:100%;padding:11px 0;border-top:1px solid var(--border);color:var(--link);font-size:var(--fs-m);text-align:left}
+.hist .ev.new{animation:histIn .45s cubic-bezier(.32,.72,0,1)}
+@keyframes histIn{from{opacity:0;transform:translateY(-6px)}}
+/* History feed of the whole project */
+.eb-link{display:inline-flex;align-items:center;gap:var(--sp-1);padding:6px;margin:-6px;color:var(--link);font-size:var(--fs-s);font-weight:500}
+.eb-link:active{opacity:.55}
+.feed-bar{display:flex;gap:var(--sp-2);overflow-x:auto;margin:0 -16px var(--gap-in);padding:0 16px 2px;scrollbar-width:none}
+.feed-bar::-webkit-scrollbar{display:none}
+/* «Задачи людей»: a strip of people (avatar, name, active count), status chips, tasks grouped by project */
+.ppl-bar{display:flex;gap:var(--sp-2);overflow-x:auto;margin:0 -16px 10px;padding:2px 16px 4px;scrollbar-width:none}
+.ppl-bar::-webkit-scrollbar{display:none}
+.ppl-bar[hidden]{display:none}
+.ppl-head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3);margin:2px 0 var(--sp-4)}
+/* a plain blue link on the title's baseline, right side («Фокус» on «Мои задачи») */
+.head-link{flex:none;margin:calc(var(--sp-2) * -1);padding:var(--sp-2);color:var(--link);font-size:var(--fs-base);font-weight:500}
+.head-link[hidden]{display:none}
+.head-link:active{opacity:.55}
+.ppl-head .h-big{margin:0 2px;min-width:0}
+/* status and project — two drop-downs in one row */
+.ppl-picks{display:flex;gap:var(--sp-2);margin:0 0 var(--gap-block)}
+.feed-bar + .ppl-picks{margin-top:var(--gap-in)}
+.ppl-picks{justify-content:flex-start}
+.ppl-picks .proj-pick{flex:0 1 auto;min-width:0;margin:0}   /* as wide as the text, from the left */
+.proj-pick .n{flex:none;color:var(--hint);font-weight:400}
+.proj-pick{display:inline-flex;align-items:center;gap:8px;max-width:100%;padding:7px 12px;border-radius:var(--r-full);border:1px solid var(--border);background:var(--surface);font-size:var(--fs-s);font-weight:500;color:var(--text)}
+.proj-pick:active{transform:scale(.96)}
+.proj-pick span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.proj-pick i,.pp-dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--hint)}
+.proj-pick.set{border-color:var(--link);color:var(--link)}
+.proj-pick .chev{flex:none;color:var(--hint)}
+#projPickList .pp-dot{width:12px;height:12px;margin:0 10px 0 4px}
+#projPickList .cnt{margin-left:auto;color:var(--hint);font-size:var(--fs-s);font-weight:400}
+#projPickList button.on .cnt{display:none}
+/* Focus: the list folded into a stack, the first task on top, the rest peeking out below */
+.stack{position:relative;margin:0 0 var(--sp-6)}
+.stack>.grid{position:relative;z-index:3}
+.stack>i{position:absolute;top:0;left:var(--sp-3);right:var(--sp-3);bottom:calc(var(--sp-2) * -1);z-index:2;border:1px solid var(--border);border-radius:var(--r-l);background:var(--bg)}
+.stack>i+i{left:var(--sp-6);right:var(--sp-6);bottom:calc(var(--sp-4) * -1);z-index:1}
+.stack.in>.grid{animation:stackTop .32s cubic-bezier(.2,.8,.2,1)}
+.stack.in>i{animation:stackLayer .38s cubic-bezier(.2,.8,.2,1) backwards}
+.stack.in>i+i{animation-delay:.05s}
+@keyframes stackTop{from{transform:scale(.97);opacity:.4}}
+@keyframes stackLayer{from{transform:translateY(calc(var(--sp-6) * 2));opacity:0}}
+.stack>i{cursor:pointer}
+.stack-more{display:block;width:100%;margin-top:calc(var(--sp-6) + var(--sp-2));padding:var(--sp-2) 0;text-align:center;color:var(--hint);opacity:.6;font-size:var(--fs-s);transition:opacity .15s}
+.stack-more:active{opacity:.35}
+.ppl-bar button{flex:none;display:flex;flex-direction:column;align-items:center;gap:5px;width:68px;padding:8px 2px 7px;border-radius:var(--r-m);border:1px solid transparent;color:var(--text);transition:background .15s,border-color .15s}
+.ppl-bar button.on{background:var(--surface);border-color:var(--link)}
+.ppl-bar .pav{position:relative;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:600;color:var(--on-color);overflow:visible}
+.ppl-bar .pav .ph{position:absolute;inset:0;border-radius:50%;overflow:hidden;display:grid;place-items:center}
+.ppl-bar .pav img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ppl-bar .pav.nobody{background:var(--muted);color:var(--hint)}
+.ppl-bar .cnt{--r:21px;background:var(--accent);color:var(--accent-text)}   /* --r: half of the 42 px avatar */
+.ppl-bar button.on .cnt{--ring:var(--surface)}
+/* WebKit (iOS) takes the font's taller line box than Chrome: text in small pills sat low. Trim the line to the
+   capitals and the baseline, so digits and labels sit in the optical middle on every engine. */
+.bdg>span,.ppl-bar .cnt>b,.seg button .n,.feed-bar .n,.proj-pick .n{text-box:trim-both cap alphabetic}
+.bdg>span{padding-block:.3em;margin-block:-.3em}   /* the clip keeps room for descenders (р, у) */
+.ppl-bar .cnt>b{font-weight:inherit;line-height:1}
+.ppl-bar .nm{font-size:var(--fs-s);font-weight:500;max-width:64px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ppl-bar button.on .nm{color:var(--link)}
+.ppl-grp{display:flex;align-items:center;gap:8px;margin:18px 2px 8px;font-size:var(--fs-s);font-weight:600;color:var(--hint)}
+.ppl-grp:first-child{margin-top:0}
+.ppl-grp i{width:8px;height:8px;border-radius:50%;flex:none}
+.ppl-grp span{margin-left:auto;font-weight:500}
+
+.feed-bar button{flex:none;display:inline-flex;align-items:center;height:var(--chip-h);padding:0 11px;border-radius:var(--r-full);border:1px solid var(--border);background:var(--surface);color:var(--hint);font-size:var(--fs-s);font-weight:500;white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
+.feed-bar button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-text)}
+/* Search: the field, chips of sections, results grouped by section with the found words marked */
+.search-box{display:flex;align-items:center;gap:var(--sp-2);height:var(--row-h);padding:0 var(--sp-1) 0 var(--pad);margin-bottom:var(--sp-3);border:1px solid var(--border);border-radius:var(--r-m);background:var(--surface);color:var(--hint)}
+.search-box:focus-within{border-color:var(--link)}
+.search-box svg{flex:none}
+.search-box input{flex:1;min-width:0;height:100%;border:0;outline:0;background:none;color:var(--text);font:inherit;font-size:var(--fs-input)}
+.search-box input::-webkit-search-cancel-button{display:none}
+.search-box .clear{flex:none;display:grid;place-items:center;width:var(--btn-h);height:var(--btn-h);color:var(--hint)}
+#searchBar{margin-bottom:var(--sp-2)}
+#searchBar .n{margin-left:var(--sp-1);opacity:.7}
+#searchPicks{margin:var(--sp-2) 0 0}
+#searchPicks[hidden],#searchBar[hidden]{display:none}
+#searchMine{flex:none}
+.hit{align-items:flex-start}
+.hit>svg{flex:none;color:var(--hint)}
+.hit>svg.done{color:var(--st-closed)}
+.hit .hx{line-height:1.35;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.hit mark{background:var(--hl);color:inherit;border-radius:var(--r-s)}
+.hit .s{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-1)}
+.hit .s .tn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.hit .pdot{flex:none;width:var(--ic-m);height:var(--ic-m);border-radius:var(--r-s)}
+.feed-bar.recent{flex-wrap:wrap;margin:0 0 var(--sp-2);padding:0}
+/* «Связанные задачи»: project square, name, status · project; the cross on the right unlinks */
+.lnk{padding-right:var(--sp-1)}
+.lnk .main{display:block;text-align:left}
+.lnk .unl{flex:none;width:var(--btn-h);height:var(--btn-h);margin-block:calc(var(--sp-2) * -1);display:grid;place-items:center;color:var(--hint);border-radius:var(--r-m)}
+.lnk .unl:active{background:var(--fill)}
+.lnk-hidden{font-size:var(--fs-s);color:var(--hint)}
+#linksLbl[hidden],#links[hidden]{display:none}
+#linkSheet .search-box{margin-bottom:0}
+#linkRes .empty{padding:var(--sp-4) 0}
+.feed-bar.recent button{color:var(--text)}
+.item.flash{animation:flash 1.8s ease-out}
+@keyframes flash{0%,30%{background:var(--hl)}100%{background:transparent}}
+.hist button.ev{width:100%;text-align:left;transition:opacity .15s}
+.feed-bar .n.u,#notifBar .n{margin-left:var(--sp-2)}
+#notifBar .n:not(.u){opacity:.7}
+.hist .ev .ud{flex:none;width:var(--sp-2);height:var(--sp-2);margin-top:var(--sp-2);border-radius:50%;background:var(--red)}
+/* «Уведомления»: each row slides right on its own — «Прочитано» / «Не прочитано» shows from under it */
+.hist.nlist{padding:0;overflow:hidden}
+.nlist .nw{overflow:hidden}
+.nlist .nw + .nw{border-top:1px solid var(--border)}
+.nlist .nrow{position:relative;padding-inline:var(--pad);border-top:0;background:var(--surface);touch-action:pan-y;cursor:pointer;transition:transform .42s cubic-bezier(.3,1.32,.55,1),opacity .15s}
+.nlist .nrow.swiping{transition:none}
+.nlist .nrow:active:not(.swiping){opacity:.55}
+.nmark{position:absolute;right:100%;top:0;bottom:0;width:160px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:var(--sp-1);padding-right:var(--sp-4);color:var(--on-color);background:var(--c-gray);font-size:var(--fs-xs);font-weight:500}
+.nmark.un{background:var(--red)}
+.nmark svg{transform:scale(.6);opacity:.6;transition:transform .2s cubic-bezier(.3,1.5,.5,1),opacity .2s}
+.nrow.armed .nmark svg{transform:scale(1.15);opacity:1}
+
+.hist .ev.unread .body > .tx:first-child{font-weight:600}
+
+.hist button.ev:active{opacity:.55}
+/* a feed row (history, «Уведомления»): what was done — large, the task — small under it */
+.hist .ft{font-size:var(--fs-s);color:var(--text);line-height:1.3;margin-top:2px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.hist .ev .body{min-width:0;flex:1}
+.hist .ev .body > .tx:first-child{font-weight:500;line-height:1.35}
+.hist .ev .body > .tx:first-child q{color:var(--text);font-weight:400}
+#feedMore{justify-content:center}
+.shotsel{flex:none;font-size:var(--fs-xs);color:var(--link);padding:3px 6px;border-radius:var(--r-s);background:var(--muted);margin-top:1px}
+
+.link-row{display:flex;align-items:center;gap:var(--sp-2);padding:0 var(--sp-3);border:1px solid var(--act-line);border-radius:var(--r-m);margin-top:var(--gap-block);color:var(--link);font-size:var(--fs-s);background:var(--surface);width:100%}
+
+
+/* Toast */
+/* toast: across the top, room for two lines; above pop-ups */
+/* drops in from above the edge with a soft spring, the icon pops, a thin line counts down; tap or swipe up — away */
+.toast{position:absolute;left:10px;right:10px;top:10px;transform:translateY(calc(-100% - 24px)) scale(.94);opacity:0;background:var(--text);color:var(--bg);
+  padding:12px var(--pad) 13px;border-radius:var(--r-l);font-size:var(--fs-m);line-height:1.35;display:flex;gap:var(--sp-3);align-items:flex-start;
+  box-shadow:var(--sh-2);transition:transform .28s cubic-bezier(.55,0,.75,.3),opacity .22s ease-in;z-index:80;pointer-events:none;overflow:hidden;
+  touch-action:none;will-change:transform;--tc:var(--green)}
+.toast.show{transform:translateY(var(--dy,0px)) scale(1);opacity:1;pointer-events:auto;
+  transition:transform .6s cubic-bezier(.34,1.45,.5,1),opacity .2s ease-out}
+.toast.drag{transition:none}
+.toast.bump{animation:toastBump .38s cubic-bezier(.34,1.56,.64,1)}
+@keyframes toastBump{0%{transform:scale(1)}35%{transform:scale(1.035)}100%{transform:scale(1)}}
+.toast.warn{--tc:var(--amber)}
+.toast.err{--tc:var(--red)}
+.toast .ti{flex:none;width:20px;height:20px;border-radius:50%;background:var(--tc);color:var(--on-color);display:grid;place-items:center;margin-top:-1px;transform:scale(.3);opacity:0}
+.toast.show .ti{animation:toastIc .5s .12s cubic-bezier(.34,1.8,.6,1) forwards}
+@keyframes toastIc{to{transform:none;opacity:1}}
+.toast .ti svg{stroke-dasharray:24;stroke-dashoffset:24}
+.toast.show .ti svg{animation:toastDraw .35s .3s ease-out forwards}
+@keyframes toastDraw{to{stroke-dashoffset:0}}
+#toastTxt{opacity:0;transform:translateY(4px)}
+.toast.show #toastTxt{opacity:1;transform:none;transition:opacity .3s .1s,transform .45s .1s cubic-bezier(.32,.72,0,1)}
+/* «Отменить» on the right of a toast: the action that was just done goes back */
+.toast .tundo{flex:none;align-self:center;margin:calc(var(--sp-2) * -1) calc(var(--sp-2) * -1) calc(var(--sp-2) * -1) auto;padding:var(--sp-2);color:var(--bg);font-size:var(--fs-m);font-weight:600;opacity:.9}
+.toast .tundo[hidden]{display:none}
+.toast .tundo:active{opacity:.5}
+.toast .bar{position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--tc);opacity:.55;transform-origin:left;transform:scaleX(0)}
+.toast.show .bar{animation:toastBar var(--dur,2s) linear forwards}
+@keyframes toastBar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+
+/* Lightbox */
+.lb{position:absolute;inset:0;background:var(--photo-bg);z-index:50;display:none;flex-direction:column;opacity:0;transition:opacity .22s ease}
+.lb.open{display:flex}
+.lb.show{opacity:1}
+.lb .slide .img{transform:scale(.96);transition:transform .28s cubic-bezier(.32,.72,0,1)}
+.lb.show .slide .img{transform:none}
+.lb .track{scroll-behavior:auto}
+.lb .img img{opacity:1!important}
+.lb .top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;color:var(--on-color)}
+.lb .top .mono{font-size:var(--fs-s);opacity:.7}
+.lb .track{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory}
+.lb .track::-webkit-scrollbar{display:none}
+.lb .slide{flex:none;width:100%;height:100%;scroll-snap-align:center;display:grid;place-items:center;padding:12px 20px 40px;overflow:hidden}
+.lb .slide .img{width:100%;max-width:330px;aspect-ratio:3/4.2;border-radius:var(--r-l);transition:transform .2s}
+.lb .dots{display:flex;justify-content:center;align-items:center;height:6px;padding:0 0 calc(22px + env(safe-area-inset-bottom));box-sizing:content-box}
+.lb .dots span{display:block;flex:none;width:6px;height:6px;margin:0 3px;border-radius:var(--r-full);background:var(--on-color);opacity:.3;
+  transition:width .25s cubic-bezier(.32,.72,0,1),opacity .2s;will-change:width}
+.lb .dots span.on{opacity:1;width:18px}
+.lb .hint{text-align:center;color:var(--on-color);opacity:.5;font-size:var(--fs-s);padding-bottom:8px}
+
+/* ---------- vibe-lightbox theme ---------- */
+.vibe-lightbox{--vibe-lightbox-bg:var(--photo-bg);--vibe-lightbox-ink:var(--on-color);--vibe-lightbox-muted:rgba(255,255,255,.6);--vibe-lightbox-faint:rgba(255,255,255,.25);
+  --vibe-lightbox-btn-bg:rgba(255,255,255,.14);--vibe-lightbox-btn-hover-bg:var(--on-color);--vibe-lightbox-btn-hover-ink:var(--photo-bg);--vibe-lightbox-shadow:none;
+  --vibe-lightbox-placeholder:#1c1c1e;--vibe-lightbox-radius:10px;--vibe-lightbox-z:200;--vibe-lightbox-font:var(--font),system-ui,sans-serif}
+@media screen and (max-width:767px){ .vibe-lightbox{--vibe-lightbox-pad:64px 0 calc(92px + env(safe-area-inset-bottom))} }
+/* no focus ring: the viewer focuses «Закрыть» itself on open, and a phone has no keyboard to need it */
+.vibe-lightbox{--vibe-lightbox-ring:none}
+.vibe-lightbox__btn:focus,.vibe-lightbox__btn:focus-visible{outline:none;box-shadow:none}
+/* «Закрыть» like the iOS round glass buttons (Telegram's «⋯»): same size and the same inset from the right edge */
+.vibe-lightbox .vibe-lightbox__btn_close,.vibe-lightbox .lb-del{top:12px;right:16px;width:44px;height:44px;
+  background:var(--glass);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+  box-shadow:inset 0 .5px 0 rgba(255,255,255,.35),inset 0 0 0 .5px rgba(255,255,255,.12)}
+.vibe-lightbox .vibe-lightbox__btn_close svg{width:18px;height:18px}
+/* «Удалить» next to «Закрыть», the same glass button */
+.vibe-lightbox .lb-del{right:70px;color:var(--on-color)}
+.vibe-lightbox .lb-del:active,.vibe-lightbox .vibe-lightbox__btn_close:active{background:var(--glass-on)}
+@media (hover:hover){ .vibe-lightbox .vibe-lightbox__btn_close:not(:disabled):hover{background:var(--glass-on);color:var(--on-color)} }
+
+/* ---------- Motion & skeletons ---------- */
+.img-sk{position:absolute;inset:0;border-radius:0}
+.img-sk.failed{animation:none;background:var(--muted)}
+.lazy-img{opacity:0;transition:opacity .3s ease}
+.lazy-img.ok{opacity:1}
+.lazy-img.instant{transition:none}
+.lb .img .img-sk{border-radius:var(--r-l);opacity:.25}
+.sk{background:linear-gradient(90deg,var(--muted) 0%,color-mix(in srgb,var(--muted) 45%,var(--bg)) 50%,var(--muted) 100%);background-size:220% 100%;animation:sk 1.25s ease-in-out infinite;border-radius:var(--r-s)}
+@keyframes sk{from{background-position:130% 0}to{background-position:-90% 0}}
+.sk-line{height:12px;border-radius:var(--r-s)}
+.enter{animation:rise .46s cubic-bezier(.32,.72,0,1) both;animation-delay:calc(var(--i,0) * 38ms)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}}
+.collapse{transition:height .32s cubic-bezier(.32,.72,0,1),opacity .2s,transform .32s cubic-bezier(.32,.72,0,1),padding .32s,border-width .32s;overflow:hidden;opacity:0;transform:translateX(-28px)}
+.pop-in{animation:popin .42s cubic-bezier(.34,1.56,.64,1) both}
+.seg .n.bump{display:inline-block;animation:bump .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes bump{40%{transform:scale(1.7);opacity:1;color:var(--green)}}
+@keyframes popin{from{opacity:0;transform:translateY(-6px) scale(.97)}}
+.fade-swap{animation:fadeswap .3s ease both}
+@keyframes fadeswap{from{opacity:0;transform:translateY(5px)}}
+.ring.celebrate{animation:cel .75s cubic-bezier(.34,1.56,.64,1)}
+@keyframes cel{30%{transform:scale(1.14) rotate(-6deg)}60%{transform:scale(.97)}}
+/* appears at once (it must cover the previous task while the screen slides in) and only fades OUT */
+/* Micro-interactions: a soft press on buttons, a small bounce when an item gets ticked */
+.sheet .btns button,.sheet .btns3 button,.feed-bar button,.st-list button,.link-row,.chip,.acts button,.iacts button{
+  transition-property:transform,background,color,border-color,box-shadow,opacity;transition-duration:.15s;transition-timing-function:ease}
+.sheet .btns button:active,.sheet .btns3 button:active,.feed-bar button:active,.st-list button:active,.link-row:active,.chip:active,.acts button:active,.iacts button:active{transform:scale(.92)}
+.item:active .check{transform:scale(.88)}
+.check.tick{animation:tick .45s cubic-bezier(.34,1.56,.64,1)}
+@keyframes tick{0%{transform:scale(.82)}55%{transform:scale(1.16)}100%{transform:scale(1.04)}}
+.item.flash{animation:itemFlash .7s ease-out}
+@keyframes itemFlash{from{background:color-mix(in srgb,var(--green) 14%,var(--card))}}
+.st-list button .ck{transform:scale(.6);transition:opacity .2s,transform .3s cubic-bezier(.34,1.56,.64,1)}
+.st-list button.on .ck{transform:none}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}}
+
+/* ---------- One size for rows and buttons ---------- */
+.set-row{min-height:var(--row-h)}
+.link-row{min-height:var(--act-h)}
+.sheet .btns button,.sheet .btns3 button{min-height:var(--btn-h)}
+
+/* ---------- Line breaks ----------
+   Everything: no lonely last word on the last line (pretty) — items, transcripts, news and other longer text.
+   Headings and short texts — titles, card names and captions, notes, empty states, toasts: lines of even length (balance). */
+body{text-wrap:pretty}
+h1,h2,h3,.h-big,.side h1,.tg-head .ttl,.sheet .h,.row .t,.row .s,.task .t,.task .meta,.st-list button,
+.ask-card .tx b,.ask-card .tx span,.set-row .tx b,.set-row .tx span,.empty,.new-note,.lb .hint,
+.hist .tx,.link-row,.sec-label,.eyebrow .mono,.news .d,.item .txt .body,.title-edit textarea{text-wrap:balance}
+
+/* Width of the one typeface: headings wider, names in lists narrower (--wd-head / --wd-list) */
+.h-big,.sheet .h,.title-edit textarea,.stats b{font-stretch:var(--wd-head)}
+.row .t,.task .t,.item .txt,.hit .hx,.hist .ft,.lnk .main,.src-msg .who b,.ppl-grp{font-stretch:var(--wd-list)}

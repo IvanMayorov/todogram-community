@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Todogram — задачи из чата</title>
+<meta name="description" content="Todogram превращает сообщения в Telegram в задачи с пунктами. Чеклист живёт прямо в чате.">
+<link rel="icon" type="image/png" href="static/favicon.png">
+<link rel="apple-touch-icon" href="static/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=TikTok+Sans:opsz,wdth,wght@12..36,75..150,300..900&display=swap">
+<style>
+
+/* the app's tokens (webapp/index.html :root), the same light and dark values */
+:root{
+  --bg:#ffffff; --page:#fafafa; --text:#09090b; --hint:#71717a; --border:#e4e4e7;
+  --accent:#18181b; --accent-text:#fafafa; --green:#16a34a; --logo-ink:#002d0f; --fs-logo:24px;
+  --fs-s:12.5px; --fs-m:14px; --fs-base:15px; --fs-l:17px; --fs-hero:clamp(36px, 6vw, 56px); --fs-h2:clamp(26px, 3.4vw, 36px); --r-l:16px;
+  --r-m:12px; --r-phone:44px; --r-full:999px;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-6:24px; --sp-8:40px; --sp-10:64px;
+  --btn-h:48px; --ic-m:18px;
+  --sh-3:0 30px 80px -30px rgba(0,0,0,.35);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#09090b; --page:#000; --text:#fafafa; --hint:#a1a1aa; --border:#27272a;
+    --accent:#fafafa; --accent-text:#09090b; --green:#22c55e; --logo-ink:#fafafa; --sh-3:0 30px 80px -30px rgba(0,0,0,.9); color-scheme:dark; }
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--page);color:var(--text);font-family:'TikTok Sans',system-ui,sans-serif;font-stretch:110%;font-size:var(--fs-base);line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+
+.wrap{max-width:1080px;margin:0 auto;padding:var(--sp-10) var(--sp-6);display:grid;grid-template-columns:1fr auto;gap:var(--sp-10);align-items:start}
+
+/* the logo from Figma (todogram, node 1:144): icon 135×132, word 64.8 px, gap 25 — kept in em so it scales as one */
+.logo{display:flex;align-items:center;gap:.386em;font-size:var(--fs-logo);font-weight:665;font-stretch:123%;font-feature-settings:"cv01" 1,"cv02" 1;line-height:1;color:var(--logo-ink);margin-bottom:var(--sp-8)}
+.logo img{width:2.083em;height:2.037em}
+
+h1{font-size:var(--fs-hero);line-height:1.02;letter-spacing:-.03em;font-weight:600;max-width:14ch}
+.lead{margin-top:var(--sp-4);font-size:var(--fs-l);color:var(--hint);max-width:34ch}
+
+.cta{display:flex;align-items:center;gap:var(--sp-4);margin-top:var(--sp-6);flex-wrap:wrap}
+.go{display:inline-flex;align-items:center;gap:var(--sp-2);height:var(--btn-h);padding:0 var(--sp-6);border-radius:var(--r-m);background:var(--accent);color:var(--accent-text);text-decoration:none;font-weight:500;transition:transform .15s}
+.go:active{transform:scale(.97)}
+.go svg{width:var(--ic-m);height:var(--ic-m)}
+.note{margin-top:var(--sp-3);color:var(--hint);font-size:var(--fs-m);max-width:40ch}
+.alpha{align-self:center;margin-left:.1em;padding:var(--sp-1) var(--sp-2);border:1px solid var(--border);border-radius:var(--r-full);font-size:var(--fs-s);font-weight:500;font-stretch:100%;color:var(--hint);line-height:1}
+
+.feats{list-style:none;margin-top:var(--sp-10);display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-6) var(--sp-8);max-width:560px}
+.feats b{display:block;font-weight:500}
+.feats p{color:var(--hint);font-size:var(--fs-m);margin-top:var(--sp-1)}
+
+.phone{position:sticky;top:var(--sp-10);width:390px;height:min(800px, calc(100dvh - 2 * var(--sp-10)));min-height:600px;border-radius:var(--r-phone);border:1px solid var(--border);background:var(--bg);overflow:hidden;box-shadow:var(--sh-3)}
+.phone iframe{display:block;width:100%;height:100%;border:0}
+
+.more{padding-top:0;min-height:0}
+.desk{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0, 300px) minmax(0, 1fr);gap:var(--sp-8);align-items:center;padding:var(--sp-6) 0}
+.desk h2{font-size:var(--fs-h2);line-height:1.08;letter-spacing:-.03em;font-weight:600}
+.desk p{margin-top:var(--sp-3);color:var(--hint);font-size:var(--fs-base)}
+.shot{border:1px solid var(--border);border-radius:var(--r-l);overflow:hidden;background:var(--bg);box-shadow:var(--sh-3)}
+.shot .bar{display:flex;align-items:center;gap:6px;height:32px;padding:0 var(--sp-3);border-bottom:1px solid var(--border)}
+.shot .bar i{width:10px;height:10px;border-radius:50%;background:var(--border)}
+.shot .bar span{margin-left:var(--sp-2);font-size:var(--fs-s);color:var(--hint)}
+.shot img{display:block;width:100%;height:auto}
+
+/* open source: the code is on GitHub, a ready-made one is asked for in Telegram */
+.oss{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0, 300px) minmax(0, 1fr);gap:var(--sp-8);align-items:start;padding:var(--sp-8) 0 var(--sp-10);border-top:1px solid var(--border)}
+.oss h2{font-size:var(--fs-h2);line-height:1.08;letter-spacing:-.03em;font-weight:600}
+.oss p{color:var(--hint);font-size:var(--fs-base);max-width:44ch}
+.oss p + p{margin-top:var(--sp-3)}
+.oss .cta{margin-top:var(--sp-6)}
+.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+
+footer{grid-column:1 / -1;display:flex;justify-content:space-between;gap:var(--sp-4);color:var(--hint);font-size:var(--fs-s);border-top:1px solid var(--border);padding-top:var(--sp-6)}
+
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr;gap:var(--sp-8);padding:var(--sp-8) var(--sp-4);min-height:0}
+  .logo{margin-bottom:var(--sp-6)}
+  .phone{position:static;width:100%;max-width:390px;height:600px;min-height:0;margin:0 auto}
+  .feats{grid-template-columns:1fr;margin-top:0}
+  .hero{display:contents}
+  .hero > .feats{order:3}
+  .phone{order:2}
+  .more{padding-top:0}
+  .desk{order:4;grid-template-columns:1fr;gap:var(--sp-6);padding:var(--sp-4) 0}
+  .oss{order:5;grid-template-columns:1fr;gap:var(--sp-6);padding:var(--sp-6) 0}
+  .oss .cta{gap:var(--sp-2)}
+  footer{order:6;flex-direction:column}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="hero">
+    <div>
+      <div class="logo"><img src="static/logo.png" alt="">todogram<span class="alpha">альфа</span></div>
+      <h1>Задачи из&nbsp;чата — в&nbsp;чеклист</h1>
+      <p class="lead">Отметьте сообщения в Telegram — бот соберёт из них задачу с пунктами. Без отдельного трекера.</p>
+      <div class="cta">
+        <a class="go" href="__BOT_LINK__?start=waitlist" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4.5L3 11.5L9.5 13.5M21 4.5L18 19.5L9.5 13.5M21 4.5L9.5 13.5M9.5 13.5V18.5L12.5 15.5"/></svg>Записаться в лист ожидания</a>
+      </div>
+      <p class="note">Готовим платную версию Todogram. Оставьте заявку в Telegram — мы вручную приглашаем участников в закрытую альфу.</p>
+    </div>
+    <ul class="feats">
+      <li><b>Реакция — и задача готова</b><p>Поставьте ✍ на сообщения — бот соберёт из них задачу с пунктами.</p></li>
+      <li><b>Голосовые — в понятные пункты</b><p>Бот расшифрует аудио и видео и разложит сказанное по задачам.</p></li>
+      <li><b>Сам находит задачи</b><p>Включите автоматический режим — ИИ прочитает переписку и создаст задачи за вас.</p></li>
+      <li><b>Чеклист прямо в чате</b><p>Отметили пункт в приложении — сообщение в чате обновилось.</p></li>
+      <li><b>Статусы и исполнители</b><p>Открыта, в работе, закрыта. У каждой задачи — кто и до когда.</p></li>
+      <li><b>Доступ под контролем</b><p>Пригласите в проект по ссылке и уберите человека в один тап.</p></li>
+      <li><b>Отчёт при закрытии</b><p>Ссылка на результат, потраченные часы и пара слов о сделанном.</p></li>
+      <li><b>Комментарии к пунктам</b><p>Обсуждайте конкретный пункт, а не всю задачу.</p></li>
+      <li><b>Напоминания о сроках</b><p>Коротко в личку, без лишнего шума.</p></li>
+      <li><b>Поиск по всему</b><p>Задачи, пункты, комментарии и результаты в одном поле.</p></li>
+      <li><b>Подключается к ИИ-агенту</b><p>Агент по MCP берёт задачи и отмечает сделанные пункты сам.</p></li>
+    </ul>
+  </div>
+
+  <div class="phone"><iframe src="/?demo&amp;projects" title="Демо Todogram" loading="eager"></iframe></div>
+
+</main>
+<div class="wrap more">
+  <section class="desk">
+    <div>
+      <h2>И&nbsp;на&nbsp;компьютере</h2>
+      <p>Те же задачи в браузере. Вход через Telegram, без пароля. На широком экране — две панели: список слева, задача справа.</p>
+    </div>
+    <figure class="shot">
+      <div class="bar"><i></i><i></i><i></i><span>tasks.isite.pro</span></div>
+      <picture>
+        <source srcset="static/desktop-dark.webp" media="(prefers-color-scheme: dark)">
+        <img src="static/desktop-light.webp" alt="Todogram в браузере: список задач проекта слева, открытая задача справа" width="1600" height="1013" loading="lazy">
+      </picture>
+    </figure>
+  </section>
+
+  <section class="oss">
+    <h2>Открытый код</h2>
+    <div>
+      <p>Проект с открытым исходным кодом: можно развернуть у себя — свой бот, свой домен, свои данные. Код и инструкция по установке — в репозитории на GitHub.</p>
+      <p>Для версии на нашем сервере запишитесь в закрытую альфу. Приглашение придёт в чат с ботом.</p>
+      <div class="cta">
+        <a class="go ghost" href="https://github.com/IvanMayorov/todogram-community" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/></svg>Код на GitHub</a>
+        <a class="go" href="__BOT_LINK__?start=waitlist" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4.5L3 11.5L9.5 13.5M21 4.5L18 19.5L9.5 13.5M21 4.5L9.5 13.5M9.5 13.5V18.5L12.5 15.5"/></svg>Записаться в альфу</a>
+      </div>
+    </div>
+  </section>
+
+  <footer><span>Todogram</span><span>Демо работает на примерах — нажимайте что угодно</span></footer>
+</div>
+</body>
+</html>

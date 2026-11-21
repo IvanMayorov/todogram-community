@@ -1,0 +1,9 @@
+services:
+  bot:
+    build: .
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - ./data:/srv/data
+    ports:
+      - "127.0.0.1:8787:8787"   # put a reverse proxy with HTTPS (Caddy / nginx + Let's Encrypt) in front

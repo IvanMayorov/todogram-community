@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 24 24">
+  <!-- Mini app loading screen (BotFather → Mini App → Loading Screen): a checkbox with a tick, filled shapes only -->
+  <path fill="#a1a1aa" fill-rule="evenodd" d="M8 3h8a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5Zm0 1.8A3.2 3.2 0 0 0 4.8 8v8A3.2 3.2 0 0 0 8 19.2h8a3.2 3.2 0 0 0 3.2-3.2V8A3.2 3.2 0 0 0 16 4.8H8Z"/>
+  <path fill="#a1a1aa" d="M15.36 8.86a.9.9 0 0 1 1.28 1.28l-5 5a.9.9 0 0 1-1.28 0l-3-3a.9.9 0 1 1 1.28-1.28l2.36 2.36 4.36-4.36Z"/>
+</svg>

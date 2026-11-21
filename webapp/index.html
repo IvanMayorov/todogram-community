@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Задачи</title>
+<link rel="icon" type="image/png" href="static/favicon.png">   <!-- green glass tick, like the bot's picture (generated, webapp/favicon.png) -->
+<link rel="apple-touch-icon" href="static/apple-touch-icon.png">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="static/vendor/vibe-lightbox.css">
+<script src="static/vendor/vibe-lightbox.js"></script>
+<!-- TikTok Sans from our own server (Google Fonts is slow or blocked for many users in Russia); one variable font with weight and width axes, SIL OFL -->
+<link rel="preload" href="static/fonts/tiktok-sans-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="static/fonts/tiktok-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:'TikTok Sans';font-style:normal;font-weight:300 900;font-stretch:75% 150%;font-display:swap;src: url(static/fonts/tiktok-sans-cyrillic-ext.woff2) format('woff2');unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;}
+@font-face{font-family:'TikTok Sans';font-style:normal;font-weight:300 900;font-stretch:75% 150%;font-display:swap;src: url(static/fonts/tiktok-sans-cyrillic.woff2) format('woff2');unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;}
+@font-face{font-family:'TikTok Sans';font-style:normal;font-weight:300 900;font-stretch:75% 150%;font-display:swap;src: url(static/fonts/tiktok-sans-latin-ext.woff2) format('woff2');unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;}
+@font-face{font-family:'TikTok Sans';font-style:normal;font-weight:300 900;font-stretch:75% 150%;font-display:swap;src: url(static/fonts/tiktok-sans-latin.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+</style>
+<link rel="stylesheet" href="static/app.css?v=__BUILD__">
+</head>
+<body>
+<div class="stage">
+  <aside class="side">
+    <span class="mono tag">TG-MINIAPP · ПРОТОТИП</span>
+    <h1>Чеклисты из&nbsp;чата</h1>
+    <p>Три экрана из ТЗ в стиле KokonutUI: проекты, задачи проекта, задача. Всё кликается: галочки, фильтры, правка, порядок, лента скринов, архив свайпом.</p>
+    <div>
+      <div class="mono" style="font-size:11px;color:var(--hint);margin-bottom:6px">ТЕМА TELEGRAM</div>
+      <div class="seg-mini" id="themeSw">
+        <button data-t="light">Светлая</button><button data-t="dark">Тёмная</button><button data-t="auto" class="on">Авто</button>
+      </div>
+    </div>
+    <p class="mono" style="font-size:11.5px">Цвета берутся из --tg-theme-*,<br>поэтому в Telegram подстроятся под тему пользователя.</p>
+  </aside>
+
+  <div class="phone" id="phone">
+    <div class="splash" id="splash" aria-hidden="true"><svg class="splash-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M12 3.9H16A4.1 4.1 0 0 1 20.1 8V16A4.1 4.1 0 0 1 16 20.1H8A4.1 4.1 0 0 1 3.9 16V8A4.1 4.1 0 0 1 8 3.9H12"/><path pathLength="1" d="M8 12L11 15L16 9.5"/></svg></div>
+    <header class="tg-head">
+      <button class="btn" id="backBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8L10 12L14 16"/></svg><span id="backLbl">Закрыть</span></button>
+      <div class="ttl"><b>Задачи</b><span>мини-приложение</span></div>
+      <button class="btn" id="moreBtn" aria-label="Ещё"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="3.2"><path d="M18.503 12.005C18.503 12.291 18.279 12.496 18.002 12.496C17.726 12.496 17.502 12.291 17.502 12.005C17.502 11.718 17.726 11.513 18.002 11.513C18.279 11.513 18.503 11.718 18.503 12.005"/><path d="M12.5 12.005C12.5 12.291 12.276 12.496 12 12.496C11.724 12.496 11.5 12.291 11.5 12.005C11.5 11.718 11.724 11.513 12 11.513C12.276 11.513 12.5 11.718 12.5 12.005"/><path d="M6.498 12.005C6.498 12.291 6.274 12.496 5.998 12.496C5.721 12.496 5.497 12.291 5.497 12.005C5.497 11.718 5.721 11.513 5.998 11.513C6.274 11.513 6.498 11.718 6.498 12.005"/></svg></button>
+    </header>
+
+    <div class="wide-empty" aria-hidden="true">Выберите задачу слева</div>
+    <section class="login" id="login" hidden>
+      <h2 class="h-big">Задачи</h2>
+      <p>Войдите через Telegram: откроется чат с ботом — там нажмите «Войти». Пароль не нужен.</p>
+      <a class="go" id="loginGo" href="#" target="_blank" rel="noopener" aria-disabled="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4.5L3 11.5L9.5 13.5M21 4.5L18 19.5L9.5 13.5M21 4.5L9.5 13.5M9.5 13.5V18.5L12.5 15.5"/></svg>Войти через Telegram</a>
+      <div class="st" id="loginSt"></div>
+    </section>
+
+    <section class="login" id="alphaGate" hidden>
+      <h2 class="h-big">Доступ к альфе</h2>
+      <p>Оставьте заявку в Telegram. Приглашение придёт в чат с ботом.</p>
+      <a class="go" id="alphaJoin" target="_blank" rel="noopener">Записаться в лист ожидания</a>
+    </section>
+    <div class="screens">
+      <div class="ptr" id="ptr" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12A7.5 7.5 0 1 1 17.3 6.7"/><path d="M19.5 4.5V8.5H15.5"/></svg></div>
+      <!-- 1. Projects -->
+      <section class="screen" id="s-projects">
+        <h2 class="h-big">Проекты</h2>
+        <div class="stats" id="stats"></div>
+        <div class="grid" id="projList"></div>
+        <button class="link-row" id="newProjBtn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Новый проект<svg class="chev" style="margin-left:auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6L15.5 12L9.5 18"/></svg></button>
+        <div class="ask-card" id="notifyAsk" hidden>
+          <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 1 1 12 0c0 4.5 1.8 6.2 2.4 6.8H3.6C4.2 16.2 6 14.5 6 10Z"/><path d="M10 19.5a2.2 2.2 0 0 0 4 0"/></svg></div>
+          <div class="tx"><b>Уведомления в личку</b><span>Бот напишет, когда в ваших задачах появятся новые пункты или сменится статус</span><button class="on-btn" id="notifyAskOn">Включить</button></div>
+          <div class="ask-acts"><button class="x" id="notifyAskX" aria-label="Скрыть"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7L17 17"/><path d="M17 7L7 17"/></svg></button></div>
+        </div>
+        <div class="foot-grid">
+          <button class="tile" id="openComments" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 11.5C19.5 15.4 16.1 18.5 12 18.5C11 18.5 10 18.3 9.1 18L4.5 19.5L5.7 15.8C4.9 14.6 4.5 13.1 4.5 11.5C4.5 7.6 7.9 4.5 12 4.5C16.1 4.5 19.5 7.6 19.5 11.5Z"/></svg><span>Комментарии</span></button>
+          <button class="tile" id="openTime" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.2" r="7.3"/><path d="M12 9.6V13.2L14.2 14.6"/><path d="M10 3.5H14"/></svg><span>Время</span></button>
+          <button class="tile" id="openSettings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9"/><path d="M17 7h3"/><circle cx="15" cy="7" r="2"/><path d="M4 17h3"/><path d="M11 17h9"/><circle cx="9" cy="17" r="2"/></svg><span>Настройки</span></button>
+          <button class="tile" id="openNews"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l1.9 4.6 4.6 1.9-4.6 1.9L12 16.5l-1.9-4.6L5.5 10l4.6-1.9L12 3.5Z"/><path d="M18.5 15.5l.8 1.9 1.9.8-1.9.8-.8 1.9-.8-1.9-1.9-.8 1.9-.8.8-1.9Z"/></svg><span>Что нового</span><span class="news-dot" id="newsDot" hidden></span></button>
+        </div>
+      </section>
+
+      <!-- 2. Tasks of project -->
+      <section class="screen off-right" id="s-tasks">
+        <div class="eyebrow"><span></span><span class="mono r" id="tasksSub"></span></div>
+        <h2 class="h-big" id="projTitle"></h2>
+        <div class="warn-card" id="adminWarn" hidden>
+          <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 16.5h.01"/><path d="M10.3 4.2L2.8 17.5c-.8 1.3.2 3 1.7 3h15c1.5 0 2.5-1.7 1.7-3L13.7 4.2c-.8-1.3-2.6-1.3-3.4 0Z"/></svg></div>
+          <div class="tx"><b>Бот не видит переписку</b><span>Без прав администратора Telegram не присылает боту сообщения и реакции: ✍️ и ⚡ не работают, автоматический режим тоже. Откройте настройки группы → «Администраторы» → «Добавить администратора» → выберите бота. Отдельные права не нужны.</span></div>
+        </div>
+        <div class="seg-wrap" id="segWrap"><div class="seg" id="filter">
+          <span class="knob"></span>
+          <button data-f="open" class="on">Открытые<span class="n"></span></button>
+          <button data-f="progress">В работе<span class="n"></span></button>
+          <button data-f="backlog">Бэклог<span class="n"></span></button>
+          <button data-f="closed">Закрытые<span class="n"></span></button>
+          <button data-f="archive">Архив<span class="n"></span></button>
+        </div></div>
+        <div class="grid" id="taskList"></div>
+        <div class="foot-grid">
+          <button class="tile" id="accessBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M2 21c0-3.3 3.1-6 7-6 1.5 0 2.9.4 4 1.1"/><path d="M19 14v6"/><path d="M16 17h6"/></svg><span>Доступ</span></button>
+          <button class="tile" id="histProj"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12L15 14"/></svg><span>История</span></button>
+        </div>
+        <button class="link-row" id="projPic" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M20.5 15.5L16 11L7 19.5"/></svg>Картинка проекта<svg class="chev" style="margin-left:auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6L15.5 12L9.5 18"/></svg></button>
+        <button class="link-row" id="renameProj" type="button" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="M13.5 6.5l4 4"/></svg><span id="renameProjTx">Переименовать проект</span><svg class="chev" style="margin-left:auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6L15.5 12L9.5 18"/></svg></button>
+      </section>
+
+      <!-- Tasks of people: mine and everyone else's, from all projects -->
+      <section class="screen off-right" id="s-people">
+        <div class="ppl-head">
+          <h2 class="h-big" id="pplTitle">Все задачи</h2>
+          <button class="head-link" id="pplFocus" type="button" aria-pressed="false" hidden>Фокус</button>
+        </div>
+        <div class="ppl-bar" id="pplBar"></div>
+        <div class="ppl-picks" id="pplFilter">
+          <button class="proj-pick" id="pplSt"><i></i><span>Все незакрытые</span><b class="n"></b><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5L12 15.5L18 9.5"/></svg></button>
+          <button class="proj-pick" id="pplProj"><i></i><span>Все проекты</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5L12 15.5L18 9.5"/></svg></button>
+        </div>
+        <div id="pplList"></div>
+        <button class="link-row" id="pplAll" type="button" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M2 21c0-3.3 3.1-6 7-6s7 2.7 7 6"/><path d="M16 3.3a4 4 0 0 1 0 7.4"/><path d="M22 21c0-2.6-1.9-4.8-4.5-5.6"/></svg>Все задачи<svg class="chev" style="margin-left:auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6L15.5 12L9.5 18"/></svg></button>
+      </section>
+
+      <!-- Comments: the newest comments of every task you can see -->
+      <section class="screen off-right" id="s-comments">
+        <h2 class="h-big">Комментарии</h2>
+        <div class="src-list cfeed" id="cfeed"></div>
+      </section>
+
+      <!-- «Время»: hours put in, by period, project and person; a tap on a project or a person filters by it -->
+      <section class="screen off-right" id="s-time">
+        <h2 class="h-big">Время</h2>
+        <div class="feed-bar" id="timeBar"></div>
+        <div class="ppl-picks" id="timePicks">
+          <button class="proj-pick" id="timeProj"><i></i><span>Все проекты</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5L12 15.5L18 9.5"/></svg></button>
+          <button class="proj-pick" id="timeWho"><i></i><span>Все люди</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5L12 15.5L18 9.5"/></svg></button>
+        </div>
+        <div class="stats" id="timeStats"></div>
+        <div id="timeBody"></div>
+      </section>
+
+      <!-- Search: tasks, items, comments, results and projects you can see; sections with counts, the found words marked -->
+      <section class="screen off-right" id="s-search">
+        <h2 class="h-big">Поиск</h2>
+        <label class="search-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20L15.8 15.8"/></svg>
+          <input id="searchInp" type="search" placeholder="Задачи, пункты, комментарии" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <button class="clear" id="searchClear" type="button" aria-label="Очистить" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.5 9.5L14.5 14.5"/><path d="M14.5 9.5L9.5 14.5"/></svg></button>
+        </label>
+        <div class="feed-bar" id="searchBar" hidden></div>
+        <div class="ppl-picks" id="searchPicks" hidden>
+          <button class="proj-pick" id="searchSt"><i></i><span>Статус</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5L12 15.5L18 9.5"/></svg></button>
+          <button class="proj-pick" id="searchProj"><i></i><span>Проект</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5L12 15.5L18 9.5"/></svg></button>
+          <button class="proj-pick" id="searchMine" aria-pressed="false"><span>Мои</span></button>
+        </div>
+        <div id="searchRes"></div>
+      </section>
+
+      <!-- «Уведомления»: what other people did in my tasks, by section; the history of all projects is a row at the bottom -->
+      <section class="screen off-right" id="s-notif">
+        <div class="ppl-head"><h2 class="h-big">Уведомления</h2><button class="head-link" id="readAll" type="button" hidden>Прочитать все</button></div>
+        <div class="feed-bar" id="notifBar"></div>
+        <div id="notifList"></div>
+        <button class="link-row" id="allHist"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12L15 14"/></svg>История всех проектов<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6L15.5 12L9.5 18"/></svg></button>
+      </section>
+
+      <!-- History: one project or all of them -->
+      <section class="screen off-right" id="s-history">
+        <div class="eyebrow"><span></span><span class="mono r" id="histSub"></span></div>
+        <h2 class="h-big">История</h2>
+        <div class="feed-bar" id="feedBar"></div>
+        <div id="feed"></div>
+      </section>
+
+      <section class="screen off-right" id="s-settings">
+        <h2 class="h-big">Настройки</h2>
+        <div class="sec-label"><span class="mono">Тема</span></div>
+        <div class="theme-pick" id="themePick" role="radiogroup"><button data-t="auto" role="radio">Авто</button><button data-t="light" role="radio">Светлая</button><button data-t="dark" role="radio">Тёмная</button></div>
+        <div class="set-note">«Авто» — как в Telegram</div>
+        <div class="sec-label"><span class="mono">Уведомления</span></div>
+          <button class="set-row" id="setNotify" role="switch" aria-checked="false">
+            <span class="tx"><b>Уведомления в личку</b><span>Изменения в задачах, где вы автор, исполнитель или что-то делали. Что присылать — ниже</span></span>
+            <span class="sw" id="notifySw"></span>
+          </button>
+        <div class="notify-kinds" id="notifyKinds" hidden></div>
+        <div class="sec-label"><span class="mono">Приложение</span></div>
+        <button class="set-row" id="setLogout" hidden>
+          <span class="tx"><b>Выйти</b><span>Только на этом сайте: в Telegram вы останетесь</span></span>
+        </button>
+        <button class="set-row" id="setHome" hidden>
+          <span class="tx"><b>Иконка на экране «Домой»</b><span id="homeSub">Открывает приложение сразу, минуя список чатов</span></span>
+          <span class="plus" id="homeIc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6V18"/><path d="M6 12H18"/></svg></span>
+        </button>
+              <button class="link-row" id="openDs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="3.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="3.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>Дизайн-система<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6L15.5 12L9.5 18"/></svg></button>
+      </section>
+
+      <!-- Design system: the live style guide, drawn with the real components (webapp/DESIGN.md describes the rules) -->
+      <section class="screen off-right" id="s-ds">
+        <h2 class="h-big">Дизайн-система</h2>
+        <div id="dsBody"></div>
+      </section>
+
+      <section class="screen off-right" id="s-news">
+        <h2 class="h-big">Что нового</h2>
+        <div class="news" id="newsList"></div>
+      </section>
+
+      <!-- 3. Task -->
+      <section class="screen off-right" id="s-task">
+        <div class="eyebrow" id="taskEyebrow" hidden><span id="taskCode" hidden></span><span class="mono r" id="taskProj"></span></div>
+        <div class="strip" id="strip"></div>
+        <div class="head-card">
+          <div class="ring" id="ring">
+            <svg width="64" height="64"><circle class="track" cx="32" cy="32" r="27"/><circle class="val" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg>
+            <div class="lbl" id="ringLbl"></div>
+          </div>
+          <div class="title-edit">
+            <button class="proj-cap" id="taskProjCap" type="button" hidden></button>
+            <textarea id="titleInp" rows="1"></textarea>
+            <div class="meta" id="taskMeta"></div>
+          </div>
+        </div>
+
+        <div class="sec-label" id="descrLbl" hidden><span class="mono">Описание</span></div>
+        <div class="descr-box" id="descrBox" hidden><div class="descr" id="descr"></div></div>
+
+        <div class="sec-label"><span class="mono">Пункты</span></div>
+        <div class="items" id="items"></div>
+
+        <div class="sec-label" id="linksLbl" hidden><span class="mono">Связанные задачи</span></div>
+        <div class="grid" id="links" hidden></div>
+
+        <div class="sec-label" id="voiceLbl"><span class="mono">Голосовые</span></div>
+        <div id="voice"></div>
+        <template id="voiceCard">
+          <article class="voice grid">
+            <div class="voice-head">
+              <button type="button" class="vplay" aria-label="Прослушать"></button>
+              <button type="button" class="voice-toggle" aria-expanded="false">
+                <span class="voice-author"></span><span class="vtime"></span>
+                <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
+              </button>
+            </div>
+            <div class="voice-body" hidden>
+              <div class="seg-wrap"><div class="seg even" role="group" aria-label="Текст голосового">
+                <button type="button" data-view="summary" class="on" aria-pressed="true">Кратко</button>
+                <button type="button" data-view="text" aria-pressed="false">Расшифровка</button>
+              </div></div>
+              <div class="voice-content" aria-live="polite"></div>
+            </div>
+          </article>
+        </template>
+
+        <div class="sec-label" id="filesLbl"><span class="mono">Файлы</span></div>
+        <div class="files" id="files"></div>
+
+        <!-- Вопросы · Комментарии · История: tabs under the task; the field writes into the open tab — no pop-up -->
+        <div class="seg-wrap talk-tabs"><div class="seg even" id="talkTabs"><span class="knob instant"></span>
+          <button data-k="q" type="button">Вопросы<span class="n"></span></button><button data-k="c" type="button">Комментарии<span class="n"></span></button><button data-k="h" type="button">История</button>
+        </div></div>
+        <div class="talk" id="talk">
+          <div class="talk-list" id="talkList"></div>
+          <div class="composer" id="talkBox">
+            <div class="att-row" id="talkAtt"></div>
+            <div class="composer-line"><button class="att-btn" id="talkClip" type="button" aria-label="Скриншот или видео"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.3 11.7L12.6 19.4C10.6 21.4 7.4 21.4 5.4 19.4C3.4 17.4 3.4 14.2 5.4 12.2L13.1 4.5C14.4 3.2 16.6 3.2 17.9 4.5C19.2 5.8 19.2 8 17.9 9.3L10.3 16.9C9.6 17.6 8.5 17.6 7.8 16.9C7.1 16.2 7.1 15.1 7.8 14.4L14.9 7.3"/></svg></button><textarea id="talkInp" rows="1" maxlength="2000" placeholder="Комментарий"></textarea><button class="send" id="talkSend" type="button" aria-label="Отправить"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M6 11L12 5L18 11"/></svg></button></div>
+          </div>
+        </div>
+        <div class="hist" id="hist"></div>
+
+        <!-- what you can do with the task: tiles, two in a row -->
+        <div class="foot-grid task-acts" id="taskActs">
+          <button class="tile" id="addDescr" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6.5H19.5"/><path d="M4.5 10.5H19.5"/><path d="M4.5 14.5H14"/><path d="M4.5 18.5H11"/></svg><span>Описание</span></button>
+          <button class="tile" id="addPhoto" type="button" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21.003 12.981V16.993C21.003 19.203 19.214 21.004 17.003 21.004H6.998C4.788 21.004 2.995 19.203 2.995 16.993V7.004C2.995 4.793 4.788 2.992 6.998 2.992H10.998"/><circle cx="18.002" cy="5.98" r="4.002"/><path d="M19.255 5.98H16.754"/><path d="M18.002 4.752V7.249"/><path d="M2.995 13.022L4.292 11.712C4.743 11.261 5.357 11.016 5.999 11.016C6.638 11.016 7.252 11.261 7.702 11.712L12.001 16.01"/><path d="M7.002 21.004L13.299 14.7C14.24 13.758 15.767 13.758 16.709 14.7L20.651 18.63"/></svg><span>Добавить фото</span></button>
+          <button class="tile" id="linkTask" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14C10.9 15.2 12.3 15.9 13.8 15.9C15.1 15.9 16.3 15.4 17.2 14.5L19.6 12.1C21.5 10.2 21.5 7.2 19.6 5.4C17.8 3.5 14.8 3.5 12.9 5.4L11.6 6.7"/><path d="M14 10C13.1 8.8 11.7 8.1 10.2 8.1C8.9 8.1 7.7 8.6 6.8 9.5L4.4 11.9C2.5 13.8 2.5 16.8 4.4 18.6C6.2 20.5 9.2 20.5 11.1 18.6L12.4 17.3"/></svg><span>Связать задачу</span></button>
+          <button class="tile" id="showSrc" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5C20 15.6 16.4 19 12 19C10.9 19 9.8 18.8 8.8 18.4L4.5 19.5L5.6 15.9C4.6 14.6 4 13.1 4 11.5C4 7.4 7.6 4 12 4C16.4 4 20 7.4 20 11.5Z"/><path d="M8.5 10H15.5"/><path d="M8.5 13.5H13"/></svg><span>Сообщение</span></button>
+          <button class="tile" id="toChat" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 16.999H18C19.657 16.999 21 15.656 21 13.998V5.999C21 4.341 19.657 2.998 18 2.998H6C4.343 2.998 3 4.341 3 5.999V13.998C3 15.656 4.343 16.999 6 16.999H8V20.999L13 16.999"/></svg><span>Открыть в чате</span></button>
+          <button class="tile" id="shareTask" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3.5"/><path d="M8 7.5L12 3.5L16 7.5"/><path d="M8.5 10.5H7C5.9 10.5 5 11.4 5 12.5V18.5C5 19.6 5.9 20.5 7 20.5H17C18.1 20.5 19 19.6 19 18.5V12.5C19 11.4 18.1 10.5 17 10.5H15.5"/></svg><span>Поделиться</span></button>
+          <button class="tile" id="copyLink" type="button"><svg id="copyIc" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6.998" y="7.008" width="14.006" height="14.006" rx="2"/><path d="M6.998 16.997H4.996C3.891 16.997 2.995 16.096 2.995 14.991V5.002C2.995 3.897 3.891 2.996 4.996 2.996H15.002C16.107 2.996 17.003 3.897 17.003 5.002V7.008"/></svg><span id="copyLbl">Копировать ссылку</span></button>
+          <button class="tile" id="moveTask" type="button" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><path d="M13.5 17H20.5"/><path d="M17 13.5V20.5"/></svg><span>Проект</span></button>
+          <button class="tile" id="archTask" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 17.998H19C20.105 17.998 21 17.106 21 16V5C21 3.895 20.105 2.999 19 2.999H8C6.895 2.999 6 3.895 6 5V16C6 17.106 6.895 17.998 8 17.998Z"/><path d="M21 13H17.566C17.215 13 16.889 13.184 16.709 13.487L16.292 14.183C16.111 14.482 15.786 14.67 15.435 14.67H11.567C11.216 14.67 10.89 14.486 10.71 14.183L10.293 13.487C10.111 13.184 9.785 13 9.434 13H6"/><path d="M3 6.998V19.001C3 20.106 3.895 20.999 5 20.999H17"/></svg><span id="archLbl">В архив</span></button>
+        </div>
+      </section>
+    </div>
+
+    <nav class="tabbar" id="tabbar">
+      <button data-tab="proj" aria-label="Проекты" title="Проекты"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg></button>
+      <button data-tab="mine" aria-label="Мои задачи" title="Мои задачи"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="M8.6 12.3L10.9 14.6L15.4 9.9"/></svg></button>
+      <button data-tab="search" aria-label="Поиск" title="Поиск"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20L15.8 15.8"/></svg></button>
+      <button data-tab="notif" aria-label="Уведомления" title="Уведомления"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10C6 6.7 8.7 4 12 4C15.3 4 18 6.7 18 10V13.6L19.6 16.4C19.9 16.9 19.5 17.5 19 17.5H5C4.5 17.5 4.1 16.9 4.4 16.4L6 13.6V10Z"/><path d="M9.8 20.2C10.3 20.7 11.1 21 12 21C12.9 21 13.7 20.7 14.2 20.2"/></svg><span class="tb-n" id="tabN" hidden></span></button>
+      <button data-tab="new" aria-label="Создать" title="Создать"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 8.5V15.5"/><path d="M8.5 12H15.5"/></svg></button>
+    </nav>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"><span class="ti" id="toastIc"></span><span id="toastTxt"></span><button class="tundo" id="toastUndo" type="button" hidden>Отменить</button><span class="bar"></span></div>
+
+    <input type="file" id="fileInp" accept="image/*" hidden>
+    <input type="file" id="attInp" accept="image/*,video/*" multiple hidden>
+
+    <div class="sheet" id="itemSheet">
+      <div class="card">
+        <div class="h" id="itemSheetTitle">Пункт</div>
+        <textarea id="itemInp" rows="2" maxlength="500" placeholder="Что нужно сделать"></textarea>
+        <div class="shotpick" id="shotPick"></div>
+        <div class="btns3"><button id="itemDel" class="danger">Удалить</button><button id="itemCancel">Отмена</button><button id="itemSave" class="primary">Сохранить</button></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="newSheet">
+      <div class="card">
+        <div class="h">Новая задача</div>
+        <button class="new-who" id="newProj" type="button"></button>
+        <textarea id="newTitle" rows="1" maxlength="120" placeholder="Название задачи"></textarea>
+        <div class="sheet-stack">
+          <textarea class="fld" id="newDescr" rows="2" maxlength="5000" placeholder="Описание: подробности, ссылка на макет или документ"></textarea>
+          <div class="sheet-hint" id="newDescrHint">Ссылки в описании станут кликабельными</div>
+        </div>
+        <div class="new-sub" id="newItemsBox">
+          <div class="new-sub-h">Подзадачи</div>
+          <div class="new-ilist" id="newIList"></div>
+          <button class="new-iadd" id="newIAdd" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V16"/><path d="M8 12H16"/></svg>Добавить подзадачу</button>
+        </div>
+        <button class="new-who" id="newWho"></button>
+        <div class="sheet-hint" id="newNote"></div>
+        <div class="btns"><button id="newCancel">Отмена</button><button id="newSave" class="primary">Создать</button></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="statusSheet">
+      <div class="card">
+        <div class="h" id="statusTitle">Статус задачи</div>
+        <div class="st-list" id="statusList"></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="dueSheet">
+      <div class="card">
+        <div class="h">Срок задачи</div>
+        <div class="due-quick" id="dueQuick"></div>
+        <div class="due-pick"><label class="dp" id="dueDateW"><input type="date" id="dueDate" aria-label="Дата"><span class="ph">Дата</span></label><label class="dp" id="dueTimeW"><input type="time" id="dueTime" aria-label="Время (необязательно)"><span class="ph">Время</span></label></div>
+        <button class="due-notime" id="dueNoTime">Без времени — весь день</button>
+        <div class="due-sub"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.6 20.001H10.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M17 10.033V10V10C17 7.241 14.761 5.001 12 5.001V5.001C9.239 5.001 7 7.241 7 10V10V10.033V12.505C7 12.829 6.817 13.123 6.528 13.267L6.025 13.521C5.397 13.836 5 14.474 5 15.178V15.178C5 16.202 5.83 17.033 6.854 17.033H17.146C18.17 17.033 19 16.202 19 15.178V15.178C19 14.474 18.603 13.836 17.975 13.521L17.472 13.271C17.183 13.123 17 12.829 17 12.505V10.033Z"/></svg>Напомнить мне в личку</div>
+        <div class="rem-list" id="remList"></div>
+        <div class="sheet-hint rem-note" id="remNote"></div>
+        <div class="btns3"><button id="dueDel" class="danger">Убрать</button><button id="dueCancel">Отмена</button><button id="dueSave" class="primary">Сохранить</button></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="projSheet">
+      <div class="card">
+        <div class="h" id="projSheetTitle">Проект</div>
+        <div class="as-list" id="projPickList"></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="assignSheet">
+      <div class="card">
+        <div class="h">Исполнитель</div>
+        <div class="as-list" id="assignList"></div>
+        <div class="sheet-hint as-note">Исполнителю придёт сообщение в личку, а напоминания о сроке, которые стоят на задаче, будут приходить и ему. В списке — те, кого бот уже видел в проекте, и люди из ваших других проектов: им откроется только эта задача — и только пока они исполнители.</div>
+      </div>
+    </div>
+
+    <div class="sheet" id="accessSheet">
+      <div class="card">
+        <div class="h">Доступ к проекту</div>
+        <div class="sheet-hint acc-note">Участники чата видят проект всегда. По ссылке можно пустить человека, которого в чате нет: он увидит все задачи проекта и сможет с ними работать.</div>
+        <div class="acc-btns"><button id="accCopy">Скопировать</button><button id="accSend" class="primary">Отправить</button></div>
+        <div class="acc-sub">Открыли ссылку</div>
+        <div class="acc-list" id="accList"></div>
+        <button class="acc-reset" id="accReset">Сбросить ссылку</button>
+      </div>
+    </div>
+
+    <div class="sheet" id="picSheet">
+      <div class="card">
+        <div class="h">Картинка проекта</div>
+        <div class="pic-drop" id="picDrop" role="button" tabindex="0"><div class="pic-prev" id="picPrev"></div><div class="pic-hint">Нажмите, перетащите или вставьте ⌘V</div></div>
+        <div class="pic-url"><input class="fld" id="picUrl" type="url" inputmode="url" autocomplete="off" placeholder="Ссылка на картинку"><button id="picUrlGo" type="button" aria-label="Поставить по ссылке"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12H19"/><path d="M13 6L19 12L13 18"/></svg></button></div>
+        <div class="sheet-hint" id="picNote"></div>
+        <div class="btns3"><button id="picDel" class="danger">Убрать</button><button id="picCancel">Отмена</button><button id="picSave" class="primary" disabled>Готово</button></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="rangeSheet">
+      <div class="card">
+        <div class="h">Диапазон дат</div>
+        <div class="due-quick" id="rangeQuick"></div>
+        <div class="due-pick"><label class="dp" id="rangeFromW"><input type="date" id="rangeFrom" aria-label="С"><span class="ph">С</span></label><label class="dp" id="rangeToW"><input type="date" id="rangeTo" aria-label="По"><span class="ph">По</span></label></div>
+        <div class="btns"><button id="rangeCancel">Отмена</button><button id="rangeSave" class="primary">Показать</button></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="timeSheet">
+      <div class="card">
+        <div class="h">Потрачено времени</div>
+        <input class="fld" id="timeInp" inputmode="decimal" autocomplete="off" placeholder="Часов, например 1,5">
+        <div class="due-quick" id="timeQuick"></div>
+        <div class="sheet-hint">Отмечайте по ходу работы: кнопки прибавляют к уже потраченному. Время попадает в «Время» на экране проектов.</div>
+        <div class="btns3"><button id="timeDel" class="danger">Убрать</button><button id="timeCancel">Отмена</button><button id="timeSave" class="primary">Сохранить</button></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="closeSheet">
+      <div class="card">
+        <div class="h" id="closeTitle">Закрыть задачу</div>
+        <div class="sheet-hint" id="closeHint">Ссылка на результат, потраченное время и описание результата — по желанию</div>
+        <input class="fld" id="closeUrl" type="url" inputmode="url" autocomplete="off" placeholder="Ссылка на результат">
+        <input class="fld" id="closeHours" inputmode="decimal" autocomplete="off" placeholder="Потрачено часов">
+        <textarea class="fld" id="closeNote" rows="3" placeholder="Опишите результат"></textarea>
+        <div class="btns"><button id="closeBare" type="button">Без отчёта</button><button id="closeOk" class="primary" type="button">Окей</button></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="resSheet">
+      <div class="card">
+        <div class="h">Результат</div>
+        <div class="res-body" id="resBody"></div>
+        <div class="btns"><button id="resEdit" type="button">Изменить</button><button id="resClose" class="primary" type="button">Закрыть</button></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="commSheet">
+      <div class="card">
+        <div class="h" id="commTitle">Комментарии</div>
+        <div class="sheet-hint" id="commAbout" hidden></div>
+        <div class="src-list" id="commList"></div>
+        <textarea id="commInp" rows="1" maxlength="2000" placeholder="Написать комментарий"></textarea>
+        <div class="att-row" id="commAtt"></div>
+        <div class="composer-bar"><button class="ask-tg" id="commAsk" type="button" aria-pressed="false"><span class="sw"></span>Вопрос</button><button class="att-btn" id="commClip" type="button" aria-label="Скриншот или видео" style="margin-left:auto"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.3 11.7L12.6 19.4C10.6 21.4 7.4 21.4 5.4 19.4C3.4 17.4 3.4 14.2 5.4 12.2L13.1 4.5C14.4 3.2 16.6 3.2 17.9 4.5C19.2 5.8 19.2 8 17.9 9.3L10.3 16.9C9.6 17.6 8.5 17.6 7.8 16.9C7.1 16.2 7.1 15.1 7.8 14.4L14.9 7.3"/></svg></button></div>
+        <div class="btns"><button id="commClose">Закрыть</button><button id="commSend" class="primary">Отправить</button></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="commEditSheet">
+      <div class="card">
+        <div class="h" id="commEditTitle">Комментарий</div>
+        <textarea class="fld" id="commEditInp" rows="3" maxlength="2000"></textarea>
+        <div class="btns3"><button id="commEditCancel" type="button">Отмена</button><button id="commEditSave" class="primary" type="button">Сохранить</button></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="descrSheet">
+      <div class="card">
+        <div class="h">Описание</div>
+        <div class="sheet-stack">
+          <textarea class="fld" id="descrInp" rows="3" maxlength="5000" placeholder="Что нужно сделать, подробности, ссылки"></textarea>
+          <div class="sheet-hint">Ссылки станут кликабельными</div>
+        </div>
+        <div class="btns3"><button id="descrDel" class="danger" type="button">Убрать</button><button id="descrCancel" type="button">Отмена</button><button id="descrSave" class="primary" type="button">Сохранить</button></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="srcSheet">
+      <div class="card">
+        <div class="h">Исходное сообщение</div>
+        <div class="src-list" id="srcList"></div>
+        <div class="btns3"><button id="srcClose">Закрыть</button></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="projNameSheet">
+      <div class="card">
+        <div class="h" id="projNameTitle">Новый проект</div>
+        <textarea id="projNameInp" rows="1" maxlength="80" placeholder="Название проекта"></textarea>
+        <div class="sheet-hint" id="projNameNote">Без отдельного чата. Задачи — здесь или пересылкой сообщений боту в личку, людей зовите ссылкой из «Доступа».</div>
+        <div class="btns3"><button id="projNameDel" class="danger">Удалить</button><button id="projNameCancel">Отмена</button><button id="projNameSave" class="primary">Создать</button></div>
+      </div>
+    </div>
+
+    <div class="sheet" id="renameSheet">
+      <div class="card">
+        <div class="h">Переименовать задачу</div>
+        <textarea id="renameInp" rows="2" maxlength="120"></textarea>
+        <div class="btns"><button id="renameCancel">Отмена</button><button id="renameSave" class="primary">Сохранить</button></div>
+      </div>
+    </div>
+
+    <!-- «Связать с задачей»: the ones that look alike first, or search by words; a tap links them -->
+    <div class="sheet" id="linkSheet">
+      <div class="card">
+        <div class="h">Связать с задачей</div>
+        <label class="search-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20L15.8 15.8"/></svg>
+          <input id="linkInp" type="search" placeholder="Найти задачу в любом проекте" enterkeyhint="search" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="sec-label" id="linkResLbl"><span class="mono">Похожие</span></div>
+        <div id="linkRes"></div>
+        <div class="btns3"><button id="linkCancel">Отмена</button></div>
+      </div>
+    </div>
+
+    <div class="lb" id="lb">
+      <div class="top"><span class="mono" id="lbCount"></span><button id="lbClose" aria-label="Закрыть" style="color:#fff;display:grid;place-items:center;width:36px;height:36px;margin:-6px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7L17 17"/><path d="M17 7L7 17"/></svg></button></div>
+      <div class="track" id="lbTrack"></div>
+      <div class="hint">Свайп — листать · двойной тап — увеличить</div>
+      <div class="dots" id="lbDots"></div>
+    </div>
+  </div>
+</div>
+
+<script>const BUILD = "__BUILD__";   // the server writes the page's version here (a hash of index.html, app.css, app.js)</script>
+<script src="static/app.js?v=__BUILD__"></script>
+</body>
+</html>
