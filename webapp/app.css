@@ -601,6 +601,9 @@ button.add-row{width:100%;text-align:left;color:var(--hint)}
 .sheet .btns .primary{background:var(--accent);color:var(--accent-text)}
 .task:active{background:var(--muted)}
 .thumb{width:54px;height:54px;border-radius:var(--r-s);flex:none;border:1px solid var(--border);overflow:hidden;position:relative}
+.thumb.project-thumb{display:grid;place-items:center;background:color-mix(in srgb,var(--project-color) 20%,var(--muted))}
+.project-thumb > .pav-s{width:calc(2 * var(--ic-m));height:calc(2 * var(--ic-m));font-size:var(--fs-base)}
+
 .task .main{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}   /* without a progress bar the text sits in the middle of the row */
 .task .t{font-weight:500;line-height:1.3}
 .task .meta{font-size:var(--fs-s);color:var(--hint);margin-top:8px;display:flex;gap:6px;align-items:center}

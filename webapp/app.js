@@ -428,18 +428,35 @@ async function newVersionOut(){
     return r.ok && (await r.json()).v !== BUILD;
   }catch(_){ return false; }
 }
-async function refreshScreen(){
-  if(await newVersionOut()){ location.reload(); return new Promise(()=>{}); }   // the spinner keeps turning until the new page is here
+async function refreshScreen(checkVersion=true){
+  if(checkVersion && await newVersionOut()){ location.reload(); return new Promise(()=>{}); }   // the spinner keeps turning until the new page is here
   const top = stack.at(-1);
   if(top === "s-projects") return loadProjects();
   if(top === "s-tasks") return loadTasks();
   if(top === "s-people") return loadPeople();
   if(top === "s-history") return refreshFeed();
   if(top === "s-notif") return loadNotif(false, true);
+  if(top === "s-search") return runSearch();
+  if(top === "s-settings") return loadMe();
   if(top === "s-comments") return loadCommentsFeed();
   if(top === "s-time") return loadTime();
-  if(top === "s-task" && curTask && LIVE){ const id = curTask.id, f = fromApi(await api(`/api/tasks/${id}`)); if(curTask?.id === id) applyFresh(f, true); }
+  if(top === "s-task" && curTask && LIVE){ const id = curTask.id, f = fromApi(await api(`/api/tasks/${id}`)); if(stack.at(-1) === top && curTask?.id === id){ applyFresh(f, true); renderTask(); } }
 }
+let refreshingByKey = false;
+window.addEventListener("keydown", async e=>{
+  if(!e.metaKey || e.altKey || e.ctrlKey || e.shiftKey || e.code !== "KeyR" && e.key.toLowerCase() !== "r") return;
+  e.preventDefault();
+  if(e.repeat || refreshingByKey || ghosting || layerOpen() || curTask?.items?.some(i=>i._t)) return;
+  const top = stack.at(-1), screen = document.getElementById(top);
+  if(top === "s-task" && document.activeElement === $("#titleInp")) return;
+  const scroll = screen.scrollTop;
+  refreshingByKey = true;
+  try{
+    await refreshScreen(false);
+    if(stack.at(-1) === top && screen.scrollTop === 0 && scroll) screen.scrollTop = scroll;
+  }catch(e){ fail(e); }
+  finally{ refreshingByKey = false; }
+}, true);
 (()=>{
   const PULL_AT = 84, MAX = 150, HOLD = 56, ind = $("#ptr"), SZ = 34;   // px of the screen's way down
   let st = null, busy = false;
@@ -2574,8 +2591,9 @@ function renderPeople(stackIn=false){
   const row = t=>{
       const d = done(t), n = total(t), pct = n ? d/n*100 : 0, st = stOf(t), th = t.thumb;
       const project = ppl.mine && !th && t.project !== PERSONAL_NAME && projects.find(p=>p.id === t.pid && !isPersonal(p));
+      const projectColor = project && (project.color || avColor(project.name || "?"));
       return `<div class="swipe" data-w="${t.id}">${rowActs(t)}<button class="task" data-t="${t.id}" data-pid="${t.pid}">${rowDone(t)}
-        <div class="thumb" style="${th?"":"background:var(--muted);display:grid;place-items:center;color:var(--hint)"}">${th ? shotHTML(th) : project ? avSmall(project, project.color) : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path fill-rule="evenodd" clip-rule="evenodd" d="M16.002 20.999H7.998C5.236 20.999 2.996 18.748 2.996 16.005V7.981C2.996 5.238 5.236 2.987 7.998 2.987H16.002C18.764 2.987 21.004 5.238 21.004 7.981V16.005C21.004 18.748 18.764 20.999 16.002 20.999Z"/><path d="M14.268 11.011L11.434 13.835L9.733 12.116"/></svg>`}</div>
+        <div class="thumb${project ? " project-thumb" : ""}" style="${project ? `--project-color:${esc(projectColor)}` : th?"":"background:var(--muted);display:grid;place-items:center;color:var(--hint)"}">${th ? shotHTML(th) : project ? avSmall(project, projectColor) : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path fill-rule="evenodd" clip-rule="evenodd" d="M16.002 20.999H7.998C5.236 20.999 2.996 18.748 2.996 16.005V7.981C2.996 5.238 5.236 2.987 7.998 2.987H16.002C18.764 2.987 21.004 5.238 21.004 7.981V16.005C21.004 18.748 18.764 20.999 16.002 20.999Z"/><path d="M14.268 11.011L11.434 13.835L9.733 12.116"/></svg>`}</div>
         <div class="main"><div class="t">${esc(t.title)}</div>
           <div class="meta">${statusBadge(t)}${t.due ? dueBadge(t) : ""}${ppl.who === -1 && t.assignee ? whoBadge(t.assignee) : ""}${qBadge(t)}${itemsBadge(d, n)}${ppl.mine && ppl.pid === null && t.project ? `<span class="t-proj">${esc(t.project)}</span>` : ""}</div>
         </div></button></div>`;
@@ -2704,7 +2722,7 @@ function openPeople(mine, anim){
     else { const l = $("#pplList"); l.classList.remove("fade-swap"); void l.offsetWidth; l.classList.add("fade-swap"); $("#s-people").scrollTo({top:0, behavior:"smooth"}); }
   }
   else go("s-people");
-  loadPeople(); updTabs();
+  updTabs(); return loadPeople();
 }
 /* The menu at the bottom: each tab starts from the main screen, so «Назад» leads home */
 function toRoot(){
@@ -4343,6 +4361,39 @@ function hideSplash(){
 }
 setTimeout(hideSplash, 5000);   // never longer than this, whatever happens
 
+const reloadViewKey = "todogram-view:" + location.pathname + location.search + ":" + (tg?.initDataUnsafe?.user?.id || "site");
+function reloadedView(){
+  try{
+    const saved = sessionStorage.getItem(reloadViewKey);
+    sessionStorage.removeItem(reloadViewKey);
+    if(performance.getEntriesByType("navigation")[0]?.type === "reload" && saved) return JSON.parse(saved);
+  }catch(_){}
+}
+window.addEventListener("pagehide", ()=>{
+  const top = stack.at(-1);
+  if(!["s-projects","s-people","s-tasks","s-task"].includes(top) || ghosting) return;
+  const view = {top, list: top === "s-task" ? stack.at(-2) : top,
+    pid: curProj?.id, filter, mine: ppl.mine, who: ppl.who,
+    tid: curTask?.id, tab: talkTab, scroll: document.getElementById(top).scrollTop};
+  try{ sessionStorage.setItem(reloadViewKey, JSON.stringify(view)); }catch(_){}
+});
+
+async function restoreReloadedView(view){
+  const project = projects.find(p=>p.id === view.pid);
+  if(view.list === "s-tasks" && project){
+    curProj = project; filter = TABS.includes(view.filter) ? view.filter : "open";
+    go("s-tasks"); await loadTasks();
+  } else if(view.list === "s-people"){
+    ppl.who = view.who; await openPeople(view.mine);
+  }
+  if(view.top === "s-task" && view.tid){
+    if(project) curProj = project;
+    await openTask(view.tid);
+    if(curTask?.id === view.tid){ talkTab = view.tab; renderTalk(); }
+  }
+  if(stack.at(-1) === view.top) document.getElementById(view.top).scrollTop = view.scroll;
+}
+
 (async function start(){
   if(tg?.web && !siteSession){ hideSplash(); showLogin(); return; }   // the site, not signed in yet
   const qs = new URLSearchParams(location.search);
@@ -4352,7 +4403,8 @@ setTimeout(hideSplash, 5000);   // never longer than this, whatever happens
   const join = (sp.match(/^join_([\w-]+)$/)||[])[1];
   let joined = null;
   const home = !q && !join && sp !== "ds" && !qs.has("ds");
-  if(home && !qs.has("projects")){   // the app opens on «Мои задачи» (Back / «Проекты» lead to the projects); ?projects — on the projects (the landing's demo)
+  const resume = reloadedView();
+  if(home && !resume && !qs.has("projects")){   // the app opens on «Мои задачи» (Back / «Проекты» lead to the projects); ?projects — on the projects (the landing's demo)
     await cloud.ready;
     const a = $("#s-projects"), b = $("#s-people"); [a, b].forEach(x=>x.style.transition = "none");
     openPeople(true);
@@ -4365,6 +4417,7 @@ setTimeout(hideSplash, 5000);   // never longer than this, whatever happens
   const ct = cloud.get("theme") || "auto";
   if(LIVE && ct !== (themePref() || "auto")) setTheme(ct, true);
   renderNewsDot(); loadMe();
+  if(resume && !join){ await restoreReloadedView(resume); return; }
   if(home && ppl.data) renderPeople();   // the projects came: their order sorts the list
   if(joined){
     curProj = projects.find(p=>p.id===joined.id) || {id:joined.id, name:joined.name};
